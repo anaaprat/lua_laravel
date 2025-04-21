@@ -38,12 +38,9 @@ class RegisterController extends Controller
         ]);
 
         $qr = QrCode::format('svg')->size(300)->generate($token);
-        Storage::disk('public')->put('qrs/bar_' . $user->id . '.png', $qr);
-        // Guardar QR en public/storage/qrs/bar_#.png
         $filePath = 'qrs/bar_' . $user->id . '.svg';
         Storage::disk('public')->put($filePath, $qr);
 
-        // Guardar ruta del QR en la BD
         $user->qr_path = $filePath;
         $user->save();
 

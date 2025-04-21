@@ -1,101 +1,159 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Panel del Bar</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bar Dashboard - Lua</title>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: sans-serif;
-            background: #f4f4f4;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Raleway', sans-serif;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 3rem auto;
-            background: white;
+        body {
+            background: linear-gradient(to bottom, #cad2c5, #84a98c, #52796f);
+            min-height: 100vh;
             padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            color: #fff;
         }
 
-        h1 {
-            text-align: center;
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+        }
+
+        .logout {
+            background: #354f52;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .logout:hover {
+            background: #2f3e46;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 0.5rem;
+        }
+
+        .order {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order span {
+            font-size: 0.95rem;
         }
 
         .section {
-            margin-bottom: 2rem;
-        }
-
-        .info {
-            background: #e9ecef;
-            padding: 1rem;
-            border-radius: 5px;
-        }
-
-        .qr-box {
+            margin-top: 3rem;
             text-align: center;
         }
 
-        img.qr {
-            width: 200px;
+        .qr img {
             margin-top: 1rem;
-            border: 1px solid #ccc;
+            width: 200px;
+            border-radius: 8px;
+            border: 1px solid #fff;
             padding: 5px;
-            border-radius: 5px;
         }
 
         .links {
-            text-align: center;
             margin-top: 2rem;
         }
 
         .links a {
+            display: inline-block;
             margin: 0.5rem 1rem;
             text-decoration: none;
-            color: #007bff;
-            font-weight: bold;
-            transition: color 0.2s;
+            background: #354f52;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            transition: background 0.3s;
         }
 
         .links a:hover {
-            color: #0056b3;
+            background: #2f3e46;
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>👋 Bienvenido, {{ auth()->user()->name }}</h1>
-
-        <div class="section info">
-            <p><strong>🔑 Token único:</strong> {{ auth()->user()->token }}</p>
-        </div>
-
-        <div class="section qr-box">
-            <p><strong>📲 QR para tus mesas:</strong></p>
-            @if(auth()->user()->qr_path)
-                <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="Código QR del bar" class="qr">
-            @else
-                <p style="color: red;">⚠️ No se ha generado el QR.</p>
-            @endif
-        </div>
-
-        <div class="links">
-            <a href="#">🛒 Ver productos</a>
-            <a href="#">📦 Ver pedidos</a>
-            <a href="#">💳 Recargas realizadas</a>
-            <a href="{{ route('logout') }}"
-               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                🔓 Cerrar sesión
-            </a>
-        </div>
-
+    <header>
+        <h1>👋 Welcome, {{ auth()->user()->name }}</h1>
+        <a href="{{ route('logout') }}" class="logout"
+            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            🔓 Logout
+        </a>
         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
             @csrf
         </form>
+    </header>
+
+    <div class="card">
+        <h2>🕒 Pending Orders</h2>
+        @foreach ($orders->where('status', 'pending') as $order)
+            <div class="order">
+                <span>Order #{{ $order->id }}</span>
+                <a href="#">Manage</a>
+            </div>
+        @endforeach
+    </div>
+
+    <div class="card">
+        <h2>✅ Completed Orders</h2>
+        @foreach ($orders->where('status', 'completed') as $order)
+            <div class="order">
+                <span>Order #{{ $order->id }}</span>
+                <a href="#">View</a>
+            </div>
+        @endforeach
+    </div>
+    </div>
+
+    <div class="section links">
+        <a href="#">🛒 Products</a>
+        <a href="#">📦 Orders</a>
+        <a href="#">💳 Recharges</a>
     </div>
 </body>
+
 </html>

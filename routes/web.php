@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Web\BarController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +17,7 @@ use App\Http\Controllers\Auth\RegisterController;
 */
 
 Route::get('/', function () {
-    return view('Auth/login');
+    return view('welcome');
 });
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -28,7 +29,5 @@ Route::post('/register', [RegisterController::class, 'register'])->name('registe
 
 
 Route::middleware(['auth', 'role:bar'])->group(function () {
-    Route::get('/bar', function () {
-        return view('bar.dashboard');
-    })->name('bar.dashboard');
+    Route::get('/bar', [BarController::class, 'dashboard'])->name('bar.dashboard');
 });
