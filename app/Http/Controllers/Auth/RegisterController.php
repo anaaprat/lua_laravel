@@ -8,10 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Writer;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class RegisterController extends Controller
 {
@@ -40,16 +37,10 @@ class RegisterController extends Controller
             'token' => $token,
         ]);
 
-        $renderer = new ImageRenderer(
-            new RendererStyle(300),
-            new SvgImageBackEnd()
-        );
-
-        $writer = new Writer($renderer);
-        $qr = $writer->writeString($token);
-
+        $qr = QrCode::format('svg')->size(300)->generate($token);
+        Storage::disk('public')->put('qrs/bar_' . $user->id . '.png', $qr);
         // Guardar QR en public/storage/qrs/bar_#.png
-        $filePath = 'qrs/bar_' . $user->id . '.png';
+        $filePath = 'qrs/bar_' . $user->id . '.svg';
         Storage::disk('public')->put($filePath, $qr);
 
         // Guardar ruta del QR en la BD
