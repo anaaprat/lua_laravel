@@ -15,6 +15,7 @@ class Product extends Model
         'type',
         'description',
         'image_url',
+        'price'
     ];
 
     public function barProducts()

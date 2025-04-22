@@ -18,12 +18,12 @@ class Order extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     public function bar()
     {
-        return $this->belongsTo(User::class, 'bar_id');
+        return $this->belongsTo(User::class);
     }
 
     public function items()

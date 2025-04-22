@@ -11,8 +11,14 @@ class BarController extends Controller
 {
     public function dashboard()
     {
-        $orders = Order::where('bar_id', Auth::id())->get(); 
+        $orders = Order::with(['user', 'items.product'])
+            ->where('bar_id', auth()->id())
+            ->orderByRaw("FIELD(status, 'pending', 'completed', 'canceled')")
+            ->get();
 
-        return view('bar.dashboard', compact('orders'));
+        $pendingOrders = $orders->where('status', 'pending')->sortBy('created_at');
+        $completedOrders = $orders->where('status', 'completed')->sortByDesc('created_at');
+
+        return view('bar.dashboard', compact('pendingOrders', 'completedOrders'));
     }
 }

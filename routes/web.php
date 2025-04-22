@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Web\BarController;
+use App\Http\Controllers\Web\OrderController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -31,3 +33,7 @@ Route::post('/register', [RegisterController::class, 'register'])->name('registe
 Route::middleware(['auth', 'role:bar'])->group(function () {
     Route::get('/bar', [BarController::class, 'dashboard'])->name('bar.dashboard');
 });
+
+Route::post('/orders/{order}/complete', [OrderController::class, 'markAsCompleted'])->name('orders.complete');
+Route::post('/orders/{order}/pending', [OrderController::class, 'markAsPending'])->name('orders.pending');
+Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
