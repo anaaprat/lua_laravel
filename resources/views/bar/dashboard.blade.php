@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bar Dashboard - Lua</title>
+    <title>{{ auth()->user()->name }} - Lua</title>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -129,18 +129,22 @@
         }
 
         .dashboard {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            /* más espacio a pendientes */
+            display: flex;
             gap: 2rem;
+            align-items: flex-start;
         }
 
         .card {
+            flex: 1;
             background: rgba(255, 255, 255, 0.1);
             padding: 1.5rem;
             border-radius: 12px;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-pending {
+            flex-grow: 1.8;
         }
 
         .card h2 {
@@ -151,36 +155,61 @@
         }
 
         .order {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             padding: 1rem;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 1rem;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            flex-wrap: wrap;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease-in-out;
             gap: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .order span {
-            font-size: 0.95rem;
+        .order:hover {
+            transform: translateY(-2px);
         }
 
-        .btn {
-            background-color: rgb(165, 215, 176);
+        .order-details {
+            flex: 1;
+        }
+
+        .order-header {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .order-items {
+            list-style: disc;
+            padding-left: 1.5rem;
+            margin: 0;
+            color: #f0f0f0;
+            font-size: 0.9rem;
+        }
+
+        .btn-order {
+            background-color: white;
             color: #2f3e46;
-            padding: 0.4rem 0.9rem;
-            border-radius: 6px;
-            font-weight: bold;
-            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
             font-size: 0.85rem;
-            transition: background-color 0.3s, color 0.3s;
+            border: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        .btn:hover {
+        .btn-order:hover {
             background-color: #52796f;
             color: white;
+        }
+
+        .order-action {
+            align-self: center;
         }
 
         .mini-logo {
@@ -199,32 +228,24 @@
             <img src="{{ asset('storage/images/lualogo.jpeg') }}" alt="Lua Logo" class="mini-logo">
             {{ auth()->user()->name }}
         </div>
+
         <div class="dashboard">
-            <div class="card">
+            <div class="card card-pending">
                 <h2>🕒 Pending Orders</h2>
                 @foreach ($pendingOrders as $order)
                     <div class="order">
-                        <div>
-                            <div>
-                                Table {{ $order->user->table_number }}<br>
-                                <ul style="margin-top: 0.5rem; font-size: 0.85rem;">
-                                    @foreach ($order->items as $item)
-                                        <li>{{ $item->quantity }}x {{ $item->product->name ?? 'Product' }}</li>
-                                    @endforeach
-                                </ul>
-                            </div><br>
-
+                        <div class="order-details">
+                            <div class="order-header">TABLE {{ $order->user->table_number }}</div>
+                            <ul class="order-items">
+                                @foreach ($order->items as $item)
+                                    <li>{{ $item->quantity }}x {{ $item->product->name ?? 'Product' }}</li>
+                                @endforeach
+                            </ul>
                         </div>
-                        <form action="{{ route('orders.complete', $order) }}" method="POST" style="display:inline;">
+                        <form action="{{ route('orders.complete', $order) }}" method="POST" class="order-action">
                             @csrf
-                            <button type="submit" class="btn">✅ Complete</button>
+                            <button type="submit" class="btn-order">✅ Complete</button>
                         </form>
-
-                        <!-- <form action="{{ route('orders.cancel', $order) }}" method="POST"
-                                                                                                        style="display:inline; margin-left: 0.5rem;">
-                                                                                                        @csrf
-                                                                                                        <button type="submit" class="btn" style="background: #ff6b6b; color: white;">❌ Cancel</button>
-                                                                                                    </form> -->
                     </div>
                 @endforeach
             </div>
@@ -233,30 +254,28 @@
                 <h2>✅ Completed Orders</h2>
                 @foreach ($completedOrders as $order)
                     <div class="order">
-                        <div>
-                            <div>
-                                Table {{ $order->user->table_number }}<br>
-
-                            </div><br>
-                            <ul style="margin-top: 0.4rem; font-size: 0.85rem;">
+                        <div class="order-details">
+                            <div class="order-header">TABLE {{ $order->user->table_number }}</div>
+                            <ul class="order-items">
                                 @foreach ($order->items as $item)
                                     <li>{{ $item->quantity }}x {{ $item->product->name ?? 'Product' }}</li>
                                 @endforeach
                             </ul>
                         </div>
-                        <form action="{{ route('orders.pending', $order) }}" method="POST" style="display:inline;">
+                        <form action="{{ route('orders.pending', $order) }}" method="POST" class="order-action">
                             @csrf
-                            <button type="submit" class="btn">🔄 Back to Pending</button>
+                            <button type="submit" class="btn-order">🔄 Back to Pending</button>
                         </form>
                     </div>
                 @endforeach
             </div>
         </div>
     </main>
+
     <aside>
         <div class="nav-links">
             <a href="#">Products</a>
-            <a href="#">Orders</a>
+            <a href="{{ route('bar.statistics') }}">Orders</a>
             <a href="#">Recharges</a>
         </div>
 
