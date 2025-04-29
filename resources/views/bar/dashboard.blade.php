@@ -19,6 +19,7 @@
             min-height: 100vh;
             background: linear-gradient(to bottom, #cad2c5, #84a98c, #52796f);
             color: #fff;
+            background-attachment: fixed;
         }
 
         aside {
@@ -274,8 +275,8 @@
 
     <aside>
         <div class="nav-links">
-            <a href="#">Products</a>
-            <a href="{{ route('bar.statistics') }}">Orders</a>
+            <a href="{{ route('bar-products.index') }}">Products</a>
+            <a href="{{ route('bar.statistics') }}">Order history</a>
             <a href="#">Recharges</a>
         </div>
 

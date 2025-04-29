@@ -19,6 +19,15 @@
             color: white;
         }
 
+        /* 
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
         .nav-links {
             display: flex;
             align-items: stretch;
@@ -38,6 +47,7 @@
             align-items: center;
             justify-content: center;
             border-bottom: 3px solid transparent;
+
         }
 
         .nav-btn:hover {
@@ -47,7 +57,7 @@
 
         .nav-btn.active {
             background-color: #3c4f55;
-        }
+        } */
 
         .bar-info {
             display: flex;
@@ -119,14 +129,16 @@
         }
 
         .back-arrow {
-            max-width: 80px;
-            font-size: 1.5rem;
-            padding: 2rem 0;
-            flex: 0 0 auto;
-        }
-
-        .back-arrow:hover {
-            color: #cad2c5;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2.7rem;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: background 0.3s;
         }
 
         table th {
@@ -163,19 +175,6 @@
         .status.canceled {
             background-color: #e76f51;
             color: white;
-        }
-
-        .bar-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.5rem 2rem 1rem 0.5rem;
-        }
-
-        .bar-info h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0;
         }
 
         .section.orders h2 {
@@ -271,44 +270,87 @@
             font-size: 1.5rem;
             margin-bottom: 0.8rem;
         }
+
+        .view-all-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+            padding-right: 2rem;
+        }
+
+        .view-all-btn {
+            background-color: white;
+            color: #2f3e46;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .view-all-btn:hover {
+            background-color: #84a98c;
+            color: white;
+        }
     </style>
 </head>
 
 <body>
 
-    <nav>
-        <div class="nav-links">
-            <a href="{{ route('bar.dashboard') }}" class="nav-btn back-arrow">⬅</a>
-            <a href="#products" class="nav-btn" id="productsBtn">Products</a>
-            <a href="{{ route('bar.statistics') }}" class="nav-btn active" id="ordersBtn">Orders</a>
-        </div>
-    </nav>
+    <a href="{{ route('bar.dashboard') }}" class="back-arrow">←</a>
 
-    <div class="bar-info">
+    <!--<div class="bar-info">
         <img src="{{ asset('storage/images/lualogo.jpeg') }}" alt="Lua Logo">
         <h1>{{ auth()->user()->name }}</h1>
-    </div>
+    </div> -->
 
     <main>
-        <!-- Filtro arriba a la derecha -->
-        <div class="top-controls">
-            <form method="GET" action="{{ route('bar.statistics') }}" class="filter-form">
-                <label>
-                    From:
-                    <input type="date" name="from" value="{{ request('from') }}">
-                </label>
-                <label>
-                    To:
-                    <input type="date" name="to" value="{{ request('to') }}">
-                </label>
-                <button type="submit">Filter</button>
-            </form>
-        </div>
+        <!-- Ranking de productos
+        <div id="products" class="section" style="display: none;">
+            <h2>🔥 Top Products</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Times Ordered</th>
+                        <th>Total €</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($topProducts as $product)
+                        <tr>
+                            <td>{{ $product->product->name }}</td>
+                            <td>{{ $product->total_quantity }}</td>
+                            <td>{{ number_format($product->total_sales, 2) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div> -->
 
         <!-- Tabla de órdenes -->
         <div id="orders" class="section orders">
+            <!-- Filtro arriba a la derecha -->
+            <div class="top-controls">
+                <form method="GET" action="{{ route('bar.statistics') }}" class="filter-form">
+                    <label>
+                        From:
+                        <input type="date" name="from" value="{{ request('from') }}">
+                    </label>
+                    <label>
+                        To:
+                        <input type="date" name="to" value="{{ request('to') }}">
+                    </label>
+                    <button type="submit">Filter</button>
+                </form>
+            </div>
             <h2>📜 Order History</h2>
 
+            @if(request('from') || request('to'))
+                <div class="view-all-container">
+                    <a href="{{ route('bar.statistics') }}" class="view-all-btn">🔄 View All</a>
+                </div>
+            @endif
             <table>
                 <thead>
                     <tr>
@@ -339,29 +381,6 @@
                                     {{ ucfirst($order->status) }}
                                 </span>
                             </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Ranking de productos -->
-        <div id="products" class="section" style="display: none;">
-            <h2>🔥 Top Products</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Times Ordered</th>
-                        <th>Total €</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($topProducts as $product)
-                        <tr>
-                            <td>{{ $product->product->name }}</td>
-                            <td>{{ $product->total_quantity }}</td>
-                            <td>{{ number_format($product->total_sales, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
