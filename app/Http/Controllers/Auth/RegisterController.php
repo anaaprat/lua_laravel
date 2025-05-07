@@ -38,7 +38,7 @@ class RegisterController extends Controller
         ]);
 
         $qr = QrCode::format('svg')->size(300)->generate($token);
-        $filePath = 'qrs/bar_' . $user->id . '.svg';
+        $filePath = 'qrs/bar_' . $user->name . '.svg';
         Storage::disk('public')->put($filePath, $qr);
 
         $user->qr_path = $filePath;

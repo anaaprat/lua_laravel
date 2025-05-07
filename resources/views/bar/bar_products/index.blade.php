@@ -15,7 +15,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
         }
 
         .container {
@@ -24,17 +24,21 @@
             padding: 3rem 2rem;
         }
 
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
         h1 {
             font-size: 2.6rem;
-            margin-bottom: 2rem;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
             color: #1e1e1e;
         }
 
-        .btn-add {
+        .btn-add,
+        .btn-back {
             display: inline-block;
             padding: 0.6rem 1.4rem;
             background-color: #2f3e46;
@@ -42,7 +46,11 @@
             text-decoration: none;
             border-radius: 8px;
             font-weight: 600;
-            margin-bottom: 1.5rem;
+        }
+
+        .btn-back {
+            margin-right: 1rem;
+            background-color: #354f52;
         }
 
         table.dataTable {
@@ -90,20 +98,16 @@
             border: 1px solid #ccc;
             border-radius: 6px;
             padding: 0.4rem 0.6rem;
-            margin-left: 0.4rem;
-            margin: 0 auto;
         }
 
         .dataTables_wrapper .dataTables_filter label {
             font-weight: 600;
             font-size: 0.95rem;
-            margin: 0 auto;
         }
 
         .dataTables_wrapper .dataTables_length select {
             border-radius: 6px;
             padding: 0.3rem 0.4rem;
-            margin: 0 auto;
         }
 
         .dataTables_wrapper {
@@ -117,8 +121,13 @@
 
 <body>
     <div class="container">
-        <h1>🍹 My Bar Products</h1>
-        <a href="{{ route('bar-products.create') }}" class="btn-add">➕ Add Product</a>
+        <div class="header-bar">
+            <h1>🍹 My Bar Products</h1>
+            <div>
+                <a href="{{ route('bar.dashboard') }}" class="btn-back">⬅ Back</a>
+                <a href="{{ route('bar-products.create') }}" class="btn-add">➕ Add Product</a>
+            </div>
+        </div>
 
         <table id="products-table" class="display">
             <thead>
@@ -138,11 +147,11 @@
                         <td>{{ $barProduct->stock }}</td>
                         <td>{{ $barProduct->available ? '✅' : '❌' }}</td>
                         <td class="actions">
-                            <a href="{{ route('bar-products.edit', $barProduct) }}">✏️</a>
+                            <a href="{{ route('bar-products.edit', $barProduct) }}">✏</a>
                             <form action="{{ route('bar-products.destroy', $barProduct) }}" method="POST"
                                 style="display:inline;">
                                 @csrf @method('DELETE')
-                                <button type="submit" onclick="return confirm('Are you sure?')">🗑️</button>
+                                <button type="submit" onclick="return confirm('Are you sure?')">🗑</button>
                             </form>
                         </td>
                     </tr>
