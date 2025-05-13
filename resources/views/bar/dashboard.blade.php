@@ -4,299 +4,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ auth()->user()->name }} - Lua</title>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Raleway', sans-serif;
-        }
-
-        body {
-            display: flex;
-            min-height: 100vh;
-            background: linear-gradient(to bottom, #cad2c5, #84a98c, #52796f);
-            color: #fff;
-            background-attachment: fixed;
-        }
-
-        aside {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 200px;
-            height: 100vh;
-            background-color: #2f3e46;
-            padding: 2rem 1rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            z-index: 1000;
-        }
-
-        .nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 1.5rem;
-            border-radius: 10px;
-            transition: background-color 0.3s, color 0.3s;
-            background-color: transparent;
-            display: block;
-            width: 100%;
-            text-align: center;
-        }
-
-        .nav-links a:hover {
-            background-color: white;
-            color: #2f3e46;
-        }
-
-        .bottom-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .qr-img {
-            width: 120px;
-            height: 120px;
-            border: 2px solid white;
-            border-radius: 10px;
-            object-fit: cover;
-            margin-top: 2rem;
-        }
-
-        .qr-note {
-            font-size: 0.8rem;
-            text-align: center;
-            color: #ccc;
-            max-width: 180px;
-        }
-
-        .logout-link {
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 0.75rem 1rem;
-            border-radius: 10px;
-            transition: background-color 0.3s, color 0.3s;
-            width: 100%;
-            text-align: center;
-        }
-
-        .logout-link:hover {
-            background-color: white;
-            color: #2f3e46;
-        }
-
-        .qr-img {
-            width: 100px;
-            height: 100px;
-            border-radius: 5px;
-            margin-bottom: 0.5rem;
-        }
-
-        .qr-note {
-            font-size: 0.85rem;
-            text-align: center;
-            color: #ccc;
-        }
-
-        main {
-            flex: 1;
-            padding: 2rem;
-            margin-right: 200px;
-        }
-
-        .bar-name {
-            display: flex;
-            align-items: center;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            color: white;
-            text-transform: uppercase;
-            gap: 10px;
-        }
-
-        .dashboard {
-            display: flex;
-            gap: 2rem;
-            align-items: flex-start;
-        }
-
-        .card {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .card-pending {
-            flex-grow: 1.8;
-        }
-
-        .card h2 {
-            margin-bottom: 1rem;
-            font-size: 1.4rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding-bottom: 0.5rem;
-        }
-
-        .order {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 1rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-            transition: transform 0.2s ease-in-out;
-            gap: 1rem;
-        }
-
-        .order:hover {
-            transform: translateY(-2px);
-        }
-
-        .order-details {
-            flex: 1;
-        }
-
-        .order-header {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: #fff;
-            text-transform: uppercase;
-        }
-
-        .order-items {
-            list-style: disc;
-            padding-left: 1.5rem;
-            margin: 0;
-            color: #f0f0f0;
-            font-size: 0.9rem;
-        }
-
-        .btn-order {
-            background-color: white;
-            color: #2f3e46;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            border: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .btn-order:hover {
-            background-color: #52796f;
-            color: white;
-        }
-
-        .order-action {
-            align-self: center;
-        }
-
-        .mini-logo {
-            width: 50px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin: 0 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-    </style>
+    <title>{{ auth()->user()->name }} - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 
 <body>
-    <main>
-        <div class="bar-name">
-            <img src="{{ asset('storage/images/lualogo.jpeg') }}" alt="Lua Logo" class="mini-logo">
-            {{ auth()->user()->name }}
-        </div>
-
-        <div class="dashboard">
-            <div class="card card-pending">
-                <h2>🕒 Pending Orders</h2>
-                @foreach ($pendingOrders as $order)
-                    <div class="order">
-                        <div class="order-details">
-                            <div class="order-header">TABLE {{ $order->user->table_number }}</div>
-                            <ul class="order-items">
-                                @foreach ($order->items as $item)
-                                    <li>{{ $item->quantity }}x {{ $item->product->name ?? 'Product' }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        <form action="{{ route('orders.complete', $order) }}" method="POST" class="order-action">
-                            @csrf
-                            <button type="submit" class="btn-order">✅ Complete</button>
-                        </form>
-                    </div>
-                @endforeach
-            </div>
-
-            <div class="card">
-                <h2>✅ Completed Orders</h2>
-                @foreach ($completedOrders as $order)
-                    <div class="order">
-                        <div class="order-details">
-                            <div class="order-header">TABLE {{ $order->user->table_number }}</div>
-                            <ul class="order-items">
-                                @foreach ($order->items as $item)
-                                    <li>{{ $item->quantity }}x {{ $item->product->name ?? 'Product' }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        <form action="{{ route('orders.pending', $order) }}" method="POST" class="order-action">
-                            @csrf
-                            <button type="submit" class="btn-order">🔄 Back to Pending</button>
-                        </form>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </main>
-
+    <!-- Barra lateral -->
     <aside>
+        <div class="sidebar-header">
+            <img src="{{ asset('storage/images/lualogo.jpeg') }}" alt="Lua Logo" class="sidebar-logo">
+            <div class="bar-sidebar-name">{{ auth()->user()->name }}</div>
+            <div class="bar-role">Bar Manager</div>
+        </div>
+
         <div class="nav-links">
-            <a href="{{ route('bar-products.index') }}">Products</a>
-            <a href="{{ route('bar.statistics') }}">Order history</a>
-            <a href="#">Recharges</a>
+            <a href="{{ route('bar.dashboard') }}" class="active">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ route('bar-products.index') }}">
+                <i class="fas fa-cocktail"></i>
+                <span>Products</span>
+            </a>
+            <a href="{{ route('bar.statistics') }}">
+                <i class="fas fa-chart-bar"></i>
+                <span>Statistics</span>
+            </a>
+            <a href="{{ route('bar.recharges') }}">
+                <i class="fas fa-wallet"></i>
+                <span>Recharges</span>
+            </a>
         </div>
 
         <div class="bottom-section">
             @if(auth()->user()->qr_path)
-                <a href="{{ asset('storage/' . auth()->user()->qr_path) }}" download="qr_bar_{{ auth()->user()->id }}.svg">
+                <div class="qr-container">
                     <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
-                </a>
-                <div class="qr-note">Click the QR to download and place it on your tables</div>
+                    <div class="qr-note">Click to download your QR code for your tables</div>
+                </div>
             @endif
 
             <a href="{{ route('logout') }}" class="logout-link"
                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                Logout
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
             </a>
             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
             </form>
         </div>
     </aside>
+
+    <!-- Contenido principal -->
+    <main>
+        <!-- Cabecera con título -->
+        <div class="header-title">
+            <div class="logo">
+                <i class="fas fa-cocktail"></i>
+            </div>
+            <h1>{{ auth()->user()->name }}</h1>
+        </div>
+
+        <!-- Tarjetas de estadísticas -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <i class="fas fa-hourglass-half stat-icon"></i>
+                <div class="stat-value">{{ $pendingOrders->count() }}</div>
+                <div class="stat-label">Pending Orders</div>
+            </div>
+
+            <div class="stat-card">
+                <i class="fas fa-check-circle stat-icon"></i>
+                <div class="stat-value">{{ $completedOrders->count() }}</div>
+                <div class="stat-label">Completed Today</div>
+            </div>
+
+            <div class="stat-card">
+                <i class="fas fa-euro-sign stat-icon"></i>
+                <div class="stat-value">
+                    {{ number_format($pendingOrders->sum('total') + $completedOrders->sum('total'), 2) }} €</div>
+                <div class="stat-label">Today's Sales</div>
+            </div>
+        </div>
+
+        <!-- Sección de órdenes pendientes -->
+        <div class="orders-section">
+            <div class="section-header">
+                <i class="fas fa-hourglass-half"></i>
+                <h2>Pending Orders</h2>
+                <div class="badge">{{ $pendingOrders->count() }}</div>
+            </div>
+
+            @if($pendingOrders->count() > 0)
+                @foreach ($pendingOrders as $order)
+                    <div class="order-item">
+                        <div class="order-info">
+                            <div class="order-meta">
+                                <span><strong>TABLE {{ $order->user->table_number }}</strong></span>
+                                <span>{{ $order->created_at->diffForHumans() }}</span>
+                            </div>
+                            <div class="order-products">
+                                @foreach ($order->items as $item)
+                                    <span>{{ $item->quantity }}x {{ $item->product->name ?? 'Product' }}</span>
+                                    @if(!$loop->last), @endif
+                                @endforeach
+                            </div>
+                            <div class="order-total">Total: {{ number_format($order->total, 2) }}€</div>
+                        </div>
+                        <div class="order-actions">
+                            <form action="{{ route('orders.complete', $order) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check"></i> Complete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+            @else
+                <div class="empty-state">
+                    <i class="far fa-smile"></i>
+                    <p>No pending orders at the moment</p>
+                    <span>Enjoy the break! New orders will appear here when customers place them.</span>
+                </div>
+            @endif
+        </div>
+
+        <!-- Sección de órdenes completadas -->
+        <div class="orders-section">
+            <div class="section-header">
+                <i class="fas fa-check-circle"></i>
+                <h2>Completed Orders</h2>
+                <div class="badge">{{ $completedOrders->count() }}</div>
+            </div>
+
+            @if($completedOrders->count() > 0)
+                @foreach ($completedOrders as $order)
+                    <div class="order-item">
+                        <div class="order-info">
+                            <div class="order-meta">
+                                <span><strong>TABLE {{ $order->user->table_number }}</strong></span>
+                                <span>{{ $order->updated_at->diffForHumans() }}</span>
+                            </div>
+                            <div class="order-products">
+                                @foreach ($order->items as $item)
+                                    <span>{{ $item->quantity }}x {{ $item->product->name ?? 'Product' }}</span>
+                                    @if(!$loop->last), @endif
+                                @endforeach
+                            </div>
+                            <div class="order-total">Total: {{ number_format($order->total, 2) }}€</div>
+                        </div>
+                        <div class="order-actions">
+                            <form action="{{ route('orders.pending', $order) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-secondary">
+                                    <i class="fas fa-undo"></i> Back to Pending
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+            @else
+                <div class="empty-state">
+                    <i class="fas fa-tasks"></i>
+                    <p>No completed orders yet</p>
+                    <span>Complete pending orders and they will appear here</span>
+                </div>
+            @endif
+        </div>
+    </main>
 </body>
 
 </html>

@@ -8,6 +8,7 @@ use App\Http\Controllers\web\BarController;
 use App\Http\Controllers\web\OrderController;
 use App\Http\Controllers\web\StatisticsController;
 use App\Http\Controllers\web\BarProductController;
+use App\Http\Controllers\web\RechargeController;
 
 
 /*
@@ -50,3 +51,4 @@ Route::post('/orders/{order}/complete', [OrderController::class, 'markAsComplete
 Route::post('/orders/{order}/pending', [OrderController::class, 'markAsPending'])->name('orders.pending');
 Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 
+Route::get('/bar/recharges', [RechargeController::class, 'index'])->name('bar.recharges');
