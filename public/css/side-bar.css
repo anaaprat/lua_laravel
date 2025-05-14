@@ -8,7 +8,7 @@
     --light: #f8fafc;
     --success: rgb(55, 155, 77);
     --warning: #f59e0b;
-    --danger: #ef4444;
+    --danger: #c23f3f;
     --card-bg: rgba(255, 255, 255, 0.9);
     --sidebar-bg: #2f3e46;
     --sidebar-width: 240px;
@@ -127,35 +127,34 @@ aside {
 }
 
 .qr-container {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 1rem;
-    border-radius: var(--radius-md);
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: var(--transition);
-}
-
-.qr-container:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: scale(1.05);
+    margin-bottom: 15px;
 }
 
 .qr-img {
     width: 150px;
     height: 150px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 0.8rem;
-    background-color: white;
-    padding: 5px;
-    box-shadow: var(--shadow-md);
+    margin-bottom: 10px;
 }
 
-.qr-note {
-    font-size: 0.8rem;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.7);
-    line-height: 1.4;
+.download-qr-btn {
+    background-color: #3490dc;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s;
+}
+
+.download-qr-btn:hover {
+    background-color: #2779bd;
 }
 
 .logout-link {
@@ -169,11 +168,11 @@ aside {
     padding: 0.8rem;
     border-radius: var(--radius-md);
     transition: var(--transition);
-    background-color: rgba(239, 68, 68, 0.8);
+    background-color: rgba(214, 72, 72, 0.8);
 }
 
 .logout-link:hover {
-    background-color: rgba(239, 68, 68, 1);
+    background-color: rgb(221, 104, 104);
 }
 
 /* Media Queries */

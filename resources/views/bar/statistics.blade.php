@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
@@ -153,50 +154,7 @@
 
 <body>
     <!-- Barra lateral -->
-    <aside>
-        <div class="sidebar-header">
-            <img src="{{ asset('storage/images/lualogo.jpeg') }}" alt="Lua Logo" class="sidebar-logo">
-            <div class="bar-sidebar-name">{{ auth()->user()->name }}</div>
-            <div class="bar-role">Bar Manager</div>
-        </div>
-
-        <div class="nav-links">
-            <a href="{{ route('bar.dashboard') }}">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="{{ route('bar-products.index') }}">
-                <i class="fas fa-cocktail"></i>
-                <span>Products</span>
-            </a>
-            <a href="{{ route('bar.statistics') }}" class="active">
-                <i class="fas fa-chart-bar"></i>
-                <span>Statistics</span>
-            </a>
-            <a href="{{ route('bar.recharges') }}">
-                <i class="fas fa-wallet"></i>
-                <span>Recharges</span>
-            </a>
-        </div>
-
-        <div class="bottom-section">
-            @if(auth()->user()->qr_path)
-                <div class="qr-container">
-                    <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
-                    <div class="qr-note">Click to download your QR code for your tables</div>
-                </div>
-            @endif
-
-            <a href="{{ route('logout') }}" class="logout-link"
-                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
-            </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                @csrf
-            </form>
-        </div>
-    </aside>
+    @include('bar.side-bar');
 
     <!-- Contenido principal -->
     <main>
@@ -277,7 +235,8 @@
                             <td>{{ $order->created_at->format('Y-m-d') }}</td>
                             <td>
                                 <span class="status-badge status-{{ $order->status }}">
-                                    <i class="fas fa-{{ $order->status == 'completed' ? 'check-circle' : 'hourglass-half' }}"></i>
+                                    <i
+                                        class="fas fa-{{ $order->status == 'completed' ? 'check-circle' : 'hourglass-half' }}"></i>
                                     {{ ucfirst($order->status) }}
                                 </span>
                             </td>
@@ -285,7 +244,8 @@
                     @empty
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 2rem;">
-                                <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.6;"></i>
+                                <i class="fas fa-info-circle"
+                                    style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.6;"></i>
                                 <p>No orders found for this period</p>
                             </td>
                         </tr>

@@ -52,3 +52,4 @@ Route::post('/orders/{order}/pending', [OrderController::class, 'markAsPending']
 Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 
 Route::get('/bar/recharges', [RechargeController::class, 'index'])->name('bar.recharges');
+

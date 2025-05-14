@@ -26,11 +26,17 @@
 
     <div class="bottom-section">
         @if(auth()->user()->qr_path)
-            <a href="{{ asset('storage/' . auth()->user()->qr_path) }}" download="qr_bar_{{ auth()->user()->id }}.svg"
-                class="qr-container">
-                <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
-                <div class="qr-note">Click to download your QR code for your tables</div>
-            </a>
+            <div class="qr-container">
+                <!-- Envolvemos la imagen en un enlace con el atributo download, igual que en tu versión anterior -->
+                <a href="{{ asset('storage/' . auth()->user()->qr_path) }}" download="qr_bar_{{ auth()->user()->id }}.svg">
+                    <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
+                </a>
+
+                <!-- Texto explicativo debajo -->
+                <p style="color: white; font-size: 12px; text-align: center; margin-top: 8px;">
+                    Haz clic en el QR para descargarlo
+                </p>
+            </div>
         @endif
 
         <a href="{{ route('logout') }}" class="logout-link"
