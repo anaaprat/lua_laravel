@@ -47,4 +47,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function rankings()
+    {
+        return $this->belongsToMany(Ranking::class, 'ranking_users')
+            ->withPivot('points', 'month_record')
+            ->withTimestamps();
+    }
 }

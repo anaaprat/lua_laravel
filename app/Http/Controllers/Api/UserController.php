@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Http\Controllers\Controller;
+use App\Models\Movement;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+
+class UserController extends Controller
+{
+    // Actualizar perfil de usuario
+    public function update(Request $request)
+    {
+        $user = $request->user();
+        
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+            'current_password' => 'required_with:password|string',
+            'password' => 'sometimes|string|min:6|confirmed',
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+        
+        // Verificar contraseña actual si se quiere cambiar
+        if ($request->has('password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'message' => 'La contraseña actual no es correcta',
+                ], 422);
+            }
+        }
+        
+        // Actualizar datos
+        if ($request->has('name')) {
+            $user->name = $request->name;
+        }
+        
+        if ($request->has('email')) {
+            $user->email = $request->email;
+        }
+        
+        if ($request->has('password')) {
+            $user->password = Hash::make($request->password);
+        }
+        
+        $user->save();
+        
+        return response()->json([
+            'message' => 'Perfil actualizado correctamente',
+            'user' => $user,
+        ]);
+    }
+
+    // Obtener historial de movimientos de saldo
+    public function creditHistory(Request $request)
+    {
+        $user = $request->user();
+        
+        $movements = Movement::with('bar:id,name')
+                           ->where('user_id', $user->id)
+                           ->orderBy('created_at', 'desc')
+                           ->get();
+                           
+        return response()->json([
+            'movements' => $movements,
+            'current_balance' => $user->credit,
+        ]);
+    }
+}
