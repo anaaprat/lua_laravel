@@ -53,7 +53,6 @@ Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name(
 
 Route::get('/bar/recharges', [RechargeController::class, 'index'])->name('bar.recharges');
 
-// En routes/web.php
-Route::get('/test-view', function () {
-    return '<h1>Test View Works!</h1>';
+Route::get('/test-view-simple', function () {
+    return view('test');
 });
