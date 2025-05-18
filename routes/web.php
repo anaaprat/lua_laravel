@@ -23,7 +23,30 @@ use App\Http\Controllers\web\RechargeController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    // Información básica
+    $info = [
+        'Laravel Version' => app()->version(),
+        'PHP Version' => phpversion(),
+        'Environment' => app()->environment(),
+        'Debug Mode' => config('app.debug'),
+        'Base Path' => base_path(),
+        'Views Path' => resource_path('views'),
+        'Login View Path' => resource_path('views/auth/login.blade.php'),
+        'Login View Exists' => file_exists(resource_path('views/auth/login.blade.php')),
+        'Route List' => array_map(function ($route) {
+            return [
+                'uri' => $route->uri(),
+                'methods' => $route->methods(),
+                'name' => $route->getName()
+            ];
+        }, app('router')->getRoutes()->getRoutes()),
+    ];
+
+    // Devolver como JSON
+    return response()->json($info);
+
+    // Comentamos la vista original para evitar problemas
+    // return view('welcome');
 });
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
