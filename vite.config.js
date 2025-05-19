@@ -8,4 +8,14 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    build: {
+        // Asegúrate de que no se utilicen características de Node.js modernas
+        target: 'es2015',
+        // Evita la minificación que puede causar errores
+        minify: false,
+    },
+    // Desactiva la optimización que puede causar problemas
+    optimizeDeps: {
+        exclude: ['axios']
+    }
 });
