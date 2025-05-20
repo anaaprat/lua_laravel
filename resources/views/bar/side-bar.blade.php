@@ -18,23 +18,24 @@
             <i class="fas fa-chart-bar"></i>
             <span>Statistics</span>
         </a>
-        <a href="{{ route('bar.recharges') }}" class="{{ request()->routeIs('bar.recharges') ? 'active' : '' }}">
+        <a href="{{ route('bar.rechargesUser') }}"
+            class="{{ request()->routeIs('bar.rechargesUser') ? 'active' : '' }}">
             <i class="fas fa-wallet"></i>
-            <span>Recharges</span>
+            <span>Recharge user's credit</span>
         </a>
     </div>
 
     <div class="bottom-section">
         @if(auth()->user()->qr_path)
             <div class="qr-container">
-                <!-- Envolvemos la imagen en un enlace con el atributo download, igual que en tu versión anterior -->
+                <!-- Envolvemos la imagen en un enlace con el atributo download -->
                 <a href="{{ asset('storage/' . auth()->user()->qr_path) }}" download="qr_bar_{{ auth()->user()->id }}.svg">
                     <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
                 </a>
 
                 <!-- Texto explicativo debajo -->
                 <p style="color: white; font-size: 12px; text-align: center; margin-top: 8px;">
-                    Haz clic en el QR para descargarlo
+                    Click on the QR to download it
                 </p>
             </div>
         @endif

@@ -76,35 +76,11 @@ Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name(
 
 Route::get('/bar/recharges', [RechargeController::class, 'index'])->name('bar.recharges');
 
-// Ruta para depurar el sistema de vistas
-Route::get('/debug-views', function () {
-    // Ver configuración actual de vistas
-    $viewConfig = config('view');
+// Rutas para la funcionalidad de recargas de usuario
+Route::middleware(['auth', 'role:bar'])->group(function () {
+    // Vista para buscar usuarios y hacer recargas
+    Route::get('/bar/recharges-user', [RechargeController::class, 'rechargesUser'])->name('bar.rechargesUser');
 
-    // Comprobar ubicación y existencia de vistas específicas
-    $loginViewPath = resource_path('views/auth/login.blade.php');
-    $loginExists = file_exists($loginViewPath);
-    $loginContent = $loginExists ? substr(file_get_contents($loginViewPath), 0, 200) : 'No existe';
-
-    // Probar carga directa
-    $viewLoader = app('view')->getFinder();
-    try {
-        $locatedPath = $viewLoader->find('auth.login');
-        $viewLoaderWorks = true;
-        $locatedPathResult = $locatedPath;
-    } catch (\Exception $e) {
-        $viewLoaderWorks = false;
-        $locatedPathResult = $e->getMessage();
-    }
-
-    // Devolver toda la información
-    return response()->json([
-        'view_config' => $viewConfig,
-        'auth_login_path' => $loginViewPath,
-        'auth_login_exists' => $loginExists,
-        'auth_login_content' => $loginContent,
-        'view_loader_works' => $viewLoaderWorks,
-        'located_path_result' => $locatedPathResult,
-        'laravel_version' => app()->version(),
-    ]);
+    // Acción para añadir crédito
+    Route::post('/bar/add-credit', [RechargeController::class, 'addCredit'])->name('bar.addCredit');
 });
