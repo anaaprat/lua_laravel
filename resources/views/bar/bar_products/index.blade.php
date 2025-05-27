@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
-        /* Estilos específicos para la tabla de productos */
         .products-header {
             display: flex;
             justify-content: space-between;
@@ -166,12 +165,9 @@
 </head>
 
 <body>
-    <!-- Barra lateral -->
     @include('bar.side-bar');
 
-    <!-- Contenido principal -->
     <main>
-        <!-- Cabecera de productos -->
         <div class="products-header">
             <div class="products-title">
                 <i class="fas fa-cocktail"></i>
@@ -182,7 +178,6 @@
             </a>
         </div>
 
-        <!-- Contenedor de tabla de productos -->
         <div class="product-table-container">
             <table id="products-table" class="display">
                 <thead>
@@ -232,7 +227,7 @@
                     searchPlaceholder: "Search products...",
                 },
                 "columnDefs": [
-                    { "orderable": false, "targets": 4 } // Disable sorting on the Actions column
+                    { "orderable": false, "targets": 4 } 
                 ]
             });
         });

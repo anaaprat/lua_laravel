@@ -138,7 +138,6 @@ class OrderController extends Controller
                 $detail['barProduct']->save();
             }
 
-            // Actualizar puntos en rankings para bebidas (si existe la funcionalidad)
             if (class_exists('App\Models\Ranking')) {
                 foreach ($productDetails as $detail) {
                     // Si el producto es una bebida, sumar puntos en rankings

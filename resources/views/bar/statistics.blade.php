@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
-        /* Estilos específicos para la página de estadísticas */
         .page-header {
             display: flex;
             align-items: center;
@@ -153,12 +152,9 @@
 </head>
 
 <body>
-    <!-- Barra lateral -->
     @include('bar.side-bar');
 
-    <!-- Contenido principal -->
     <main>
-        <!-- Cabecera de página -->
         <div class="page-header">
             <div class="logo">
                 <i class="fas fa-chart-bar"></i>
@@ -166,7 +162,6 @@
             <h1>{{ auth()->user()->name }} - Statistics</h1>
         </div>
 
-        <!-- Tarjetas de estadísticas -->
         <div class="stats-cards">
             <div class="stat-card">
                 <div class="stat-value">{{ number_format($totalSales, 2) }}€</div>
@@ -182,7 +177,6 @@
             </div>
         </div>
 
-        <!-- Filtro de fechas -->
         <form method="GET" action="{{ route('bar.statistics') }}" class="filter-form">
             <div>
                 <label for="from">From:</label>
@@ -202,7 +196,6 @@
             @endif
         </form>
 
-        <!-- Tabla de historial de órdenes -->
         <div class="order-history-table">
             <div class="table-header">
                 <i class="fas fa-scroll"></i>
@@ -254,7 +247,6 @@
             </table>
         </div>
 
-        <!-- Top productos (si existen) -->
         @if(isset($topProducts) && $topProducts->count() > 0)
             <div class="order-history-table" style="margin-top: 2rem;">
                 <div class="table-header">

@@ -17,12 +17,15 @@ class RegisterController extends Controller
         return view('auth.register');
     }
 
+    // En RegisterController.php, dentro del método register:
+
     public function register(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|confirmed|min:6',
+            'table_number' => 'required|integer|min:1|max:100', // Añadir validación para número de mesas
         ]);
 
         // Generar token único
@@ -35,6 +38,7 @@ class RegisterController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => 'bar',
             'token' => $token,
+            'table_number' => $validated['table_number'], // Guardar el número de mesas
         ]);
 
         $qr = QrCode::format('svg')->size(300)->generate($token);

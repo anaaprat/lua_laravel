@@ -14,6 +14,7 @@ class Order extends Model
         'bar_id',
         'total',
         'status',
+        'table_number', 
     ];
 
     public function user()

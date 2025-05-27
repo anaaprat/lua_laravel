@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\ProductController;
+use App\Http\Controllers\web\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -23,30 +24,7 @@ use App\Http\Controllers\web\RechargeController;
 */
 
 Route::get('/', function () {
-    // Información básica
-    $info = [
-        'Laravel Version' => app()->version(),
-        'PHP Version' => phpversion(),
-        'Environment' => app()->environment(),
-        'Debug Mode' => config('app.debug'),
-        'Base Path' => base_path(),
-        'Views Path' => resource_path('views'),
-        'Login View Path' => resource_path('views/auth/login.blade.php'),
-        'Login View Exists' => file_exists(resource_path('views/auth/login.blade.php')),
-        'Route List' => array_map(function ($route) {
-            return [
-                'uri' => $route->uri(),
-                'methods' => $route->methods(),
-                'name' => $route->getName()
-            ];
-        }, app('router')->getRoutes()->getRoutes()),
-    ];
-
-    // Devolver como JSON
-    return response()->json($info);
-
-    // Comentamos la vista original para evitar problemas
-    // return view('welcome');
+    return view('welcome');
 });
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -60,27 +38,71 @@ Route::post('/register', [RegisterController::class, 'register'])->name('registe
 Route::middleware(['auth', 'role:bar'])->group(function () {
     Route::get('/bar', [BarController::class, 'dashboard'])->name('bar.dashboard');
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('bar.statistics');
-
-    //Gestion de los products
     Route::get('/bar-products', [BarProductController::class, 'index'])->name('bar-products.index');
     Route::get('/bar-products/create', [BarProductController::class, 'create'])->name('bar-products.create');
     Route::post('/bar-products', [BarProductController::class, 'store'])->name('bar-products.store');
     Route::get('/bar-products/{barProduct}/edit', [BarProductController::class, 'edit'])->name('bar-products.edit');
     Route::put('/bar-products/{barProduct}', [BarProductController::class, 'update'])->name('bar-products.update');
     Route::delete('/bar-products/{barProduct}', [BarProductController::class, 'destroy'])->name('bar-products.destroy');
+    Route::get('/bar/recharges-user', [RechargeController::class, 'rechargesUser'])->name('bar.rechargesUser');
+    Route::post('/bar/add-credit', [RechargeController::class, 'addCredit'])->name('bar.addCredit');
+    Route::get('/bar/account', [App\Http\Controllers\web\BarAccountController::class, 'show'])->name('bar.account');
+    Route::post('/bar/account/update', [App\Http\Controllers\web\BarAccountController::class, 'update'])->name('bar.account.update');
+    Route::post('/bar/account/update-password', [App\Http\Controllers\web\BarAccountController::class, 'updatePassword'])->name('bar.account.updatePassword');
+
+    Route::post('/orders/{order}/complete', [OrderController::class, 'markAsCompleted'])->name('orders.complete');
+    Route::post('/orders/{order}/pending', [OrderController::class, 'markAsPending'])->name('orders.pending');
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+
+    Route::get('/bar/recharges', [RechargeController::class, 'index'])->name('bar.recharges');
 });
 
-Route::post('/orders/{order}/complete', [OrderController::class, 'markAsCompleted'])->name('orders.complete');
-Route::post('/orders/{order}/pending', [OrderController::class, 'markAsPending'])->name('orders.pending');
-Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+// Rutas ADMIN
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
 
-Route::get('/bar/recharges', [RechargeController::class, 'index'])->name('bar.recharges');
+    // Gestión de Usuarios
+    Route::get('/users', [AdminController::class, 'users'])->name('users');
+    Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
+    Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
+    Route::get('/users/{id}/edit', [AdminController::class, 'editUser'])->name('users.edit');
+    Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
+    Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
+    Route::patch('/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('users.toggle-status');
 
-// Rutas para la funcionalidad de recargas de usuario
-Route::middleware(['auth', 'role:bar'])->group(function () {
-    // Vista para buscar usuarios y hacer recargas
-    Route::get('/bar/recharges-user', [RechargeController::class, 'rechargesUser'])->name('bar.rechargesUser');
+    // Gestión de Bares
+    Route::get('/bars', [AdminController::class, 'bars'])->name('bars');
+    Route::get('/bars/create', [AdminController::class, 'createBar'])->name('bars.create');
+    Route::post('/bars', [AdminController::class, 'storeBar'])->name('bars.store');
+    Route::get('/bars/{id}/edit', [AdminController::class, 'editBar'])->name('bars.edit');
+    Route::put('/bars/{id}', [AdminController::class, 'updateBar'])->name('bars.update');
+    Route::delete('/bars/{id}', [AdminController::class, 'deleteBar'])->name('bars.delete');
+    Route::patch('/bars/{id}/toggle-status', [AdminController::class, 'toggleBarStatus'])->name('bars.toggle-status');
 
-    // Acción para añadir crédito
-    Route::post('/bar/add-credit', [RechargeController::class, 'addCredit'])->name('bar.addCredit');
+    // Gestión de Productos
+    Route::get('/products', [AdminController::class, 'products'])->name('products');
+    Route::get('/products/create', [AdminController::class, 'createProduct'])->name('products.create');
+    Route::post('/products', [AdminController::class, 'storeProduct'])->name('products.store');
+    Route::get('/products/{id}/edit', [AdminController::class, 'editProduct'])->name('products.edit');
+    Route::put('/products/{id}', [AdminController::class, 'updateProduct'])->name('products.update');
+    Route::delete('/products/{id}', [AdminController::class, 'deleteProduct'])->name('products.delete');
+
+    // Visualización de Movimientos
+    Route::get('/movements', [AdminController::class, 'movements'])->name('movements');
+
+    // Visualización de Pedidos
+    Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
+
+    // Gestión de Rankings
+    Route::get('/rankings', [AdminController::class, 'rankings'])->name('rankings');
+    Route::get('/rankings/create', [AdminController::class, 'createRanking'])->name('rankings.create');
+    Route::post('/rankings', [AdminController::class, 'storeRanking'])->name('rankings.store');
+    Route::get('/rankings/{id}', [AdminController::class, 'showRanking'])->name('rankings.show');
+    Route::get('/rankings/{id}/edit', [AdminController::class, 'editRanking'])->name('rankings.edit');
+    Route::put('/rankings/{id}', [AdminController::class, 'updateRanking'])->name('rankings.update');
+    Route::delete('/rankings/{id}', [AdminController::class, 'deleteRanking'])->name('rankings.delete');
+    Route::patch('/rankings/{id}/reset', [AdminController::class, 'resetRankingPoints'])->name('rankings.reset');
+    Route::post('/rankings/reset-all', [AdminController::class, 'resetAllRankings'])->name('rankings.reset-all');
+
 });

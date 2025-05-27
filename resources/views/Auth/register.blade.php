@@ -176,6 +176,14 @@
                 <label for="password_confirmation">Confirm password</label>
                 <input type="password" name="password_confirmation" required>
             </div>
+            <div class="form-group">
+                <label for="table_number">Number of tables</label>
+                <input type="number" name="table_number" min="1" max="100" value="{{ old('table_number', 1) }}"
+                    required>
+                <small style="color: rgba(255, 255, 255, 0.6); font-size: 0.8rem;">
+                    Define how many tables will be available for your customers.
+                </small>
+            </div>
             <button type="submit">Register</button>
         </form>
 

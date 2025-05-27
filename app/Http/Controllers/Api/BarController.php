@@ -37,7 +37,6 @@ class BarController extends Controller
         ]);
     }
 
-    // Obtener la carta de productos de un bar
     public function getProducts($barId)
     {
         $bar = User::where('id', $barId)

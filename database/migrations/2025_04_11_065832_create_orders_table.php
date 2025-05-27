@@ -9,10 +9,11 @@ return new class extends Migration {
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // cliente
-            $table->foreignId('bar_id')->constrained('users')->onDelete('cascade');  // bar
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); 
+            $table->foreignId('bar_id')->constrained('users')->onDelete('cascade'); 
             $table->float('total');
             $table->enum('status', ['pending', 'completed', 'canceled'])->default('pending');
+            $table->integer('table_number')->nullable();
             $table->timestamps();
         });
     }
@@ -22,4 +23,3 @@ return new class extends Migration {
         Schema::dropIfExists('orders');
     }
 };
-

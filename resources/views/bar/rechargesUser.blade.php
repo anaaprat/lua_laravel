@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
-        /* Variables adicionales adaptadas al mockup */
         :root {
             --bg-green-light: rgba(132, 169, 140, 0.3);
             --bg-green-medium: rgba(82, 121, 111, 0.6);
@@ -25,7 +24,6 @@
             background: linear-gradient(135deg, #84a98c, #52796f);
         }
 
-        /* Estilos específicos para la página de recargas de usuario */
         .page-header {
             display: flex;
             align-items: center;
@@ -344,7 +342,6 @@
             border: 1px solid rgba(235, 77, 75, 0.3);
         }
 
-        /* Media Queries */
         @media (max-width: 992px) {
             main {
                 margin-left: var(--sidebar-collapsed);
@@ -388,12 +385,9 @@
 </head>
 
 <body>
-    <!-- Barra lateral -->
     @include('bar.side-bar')
 
-    <!-- Contenido principal -->
     <main>
-        <!-- Cabecera de página -->
         <div class="page-header">
             <div class="logo">
                 <i class="fas fa-wallet"></i>
@@ -401,7 +395,6 @@
             <h1>{{ auth()->user()->name }} - Clients recharges</h1>
         </div>
 
-        <!-- Notificaciones -->
         @if(session('success'))
             <div class="alert alert-success">
                 <i class="fas fa-check-circle"></i> {{ session('success') }}
@@ -414,7 +407,6 @@
             </div>
         @endif
 
-        <!-- Sección de búsqueda -->
         <div class="search-section">
             <form method="GET" action="{{ route('bar.rechargesUser') }}" class="search-form">
                 <div style="flex: 1;">
@@ -428,7 +420,6 @@
             </form>
         </div>
 
-        <!-- Resultados de la búsqueda -->
         @if(isset($user))
             <div class="user-result">
                 <div class="user-info">
@@ -460,7 +451,6 @@
             </div>
         @endif
 
-        <!-- Sección de recargas recientes -->
         <div class="recent-section">
             <div class="section-header">
                 <i class="fas fa-history"></i>
@@ -500,7 +490,6 @@
     </main>
 
     <script>
-        // Si hay un input search, le damos focus al cargar la página
         document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.getElementById('search');
             if (searchInput) {

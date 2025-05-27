@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
-        /* Estilos específicos para el formulario de productos */
         .form-page {
             display: flex;
             justify-content: center;
@@ -196,7 +195,6 @@
 </head>
 
 <body>
-    <!-- Barra lateral -->
     <aside>
         <div class="sidebar-header">
             <img src="{{ asset('storage/images/lualogo.jpeg') }}" alt="Lua Logo" class="sidebar-logo">
@@ -242,7 +240,6 @@
         </div>
     </aside>
 
-    <!-- Contenido principal -->
     <div class="form-page">
         <div class="form-container">
             <div class="form-header">

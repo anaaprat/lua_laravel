@@ -6,6 +6,10 @@
     </div>
 
     <div class="nav-links">
+        <a href="{{ route('bar.account') }}" class="{{ request()->routeIs('bar.account') ? 'active' : '' }}">
+            <i class="fas fa-user-cog"></i>
+            <span>My Account</span>
+        </a>
         <a href="{{ route('bar.dashboard') }}" class="{{ request()->routeIs('bar.dashboard') ? 'active' : '' }}">
             <i class="fas fa-home"></i>
             <span>Dashboard</span>
@@ -28,12 +32,10 @@
     <div class="bottom-section">
         @if(auth()->user()->qr_path)
             <div class="qr-container">
-                <!-- Envolvemos la imagen en un enlace con el atributo download -->
                 <a href="{{ asset('storage/' . auth()->user()->qr_path) }}" download="qr_bar_{{ auth()->user()->id }}.svg">
                     <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
                 </a>
 
-                <!-- Texto explicativo debajo -->
                 <p style="color: white; font-size: 12px; text-align: center; margin-top: 8px;">
                     Click on the QR to download it
                 </p>

@@ -12,12 +12,9 @@
 </head>
 
 <body>
-    <!-- Barra lateral -->
     @include('bar.side-bar');
 
-    <!-- Contenido principal -->
     <main>
-        <!-- Cabecera con título -->
         <div class="header-title">
             <div class="logo">
                 <i class="fas fa-cocktail"></i>
@@ -25,7 +22,6 @@
             <h1>{{ auth()->user()->name }}</h1>
         </div>
 
-        <!-- Tarjetas de estadísticas -->
         <div class="stats-cards">
             <div class="stat-card">
                 <i class="fas fa-hourglass-half stat-icon"></i>
@@ -48,7 +44,6 @@
             </div>
         </div>
 
-        <!-- Sección de órdenes pendientes -->
         <div class="orders-section">
             <div class="section-header">
                 <i class="fas fa-hourglass-half"></i>
@@ -91,7 +86,6 @@
             @endif
         </div>
 
-        <!-- Sección de órdenes completadas -->
         <div class="orders-section">
             <div class="section-header">
                 <i class="fas fa-check-circle"></i>
