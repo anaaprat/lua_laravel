@@ -119,7 +119,6 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Usuario</th>
                         <th>Bar</th>
                         <th>Productos</th>
@@ -132,9 +131,6 @@
                 <tbody>
                     @forelse($orders as $order)
                         <tr>
-                            <td>
-                                <strong>#{{ $order->id }}</strong>
-                            </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="avatar-sm me-2">

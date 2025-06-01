@@ -32,31 +32,6 @@
     </div>
 
     <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-line text-primary"></i>
-                        Resumen Financiero
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span>Total Movimientos:</span>
-                        <span class="fw-bold text-{{ $stats['total_movements'] >= 0 ? 'success' : 'danger' }}">
-                            €{{ number_format($stats['total_movements'], 2) }}
-                        </span>
-                    </div>
-                    <hr>
-                    <div class="text-center">
-                        <a href="{{ route('admin.movements') }}" class="btn btn-outline-primary btn-sm">
-                            Ver Detalles
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -72,7 +47,6 @@
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
                                         <th>Usuario</th>
                                         <th>Bar</th>
                                         <th>Total</th>
@@ -83,7 +57,6 @@
                                 <tbody>
                                     @foreach($recent_orders as $order)
                                         <tr>
-                                            <td>#{{ $order->id }}</td>
                                             <td>{{ $order->user->name }}</td>
                                             <td>{{ $order->bar->name }}</td>
                                             <td>€{{ number_format($order->total, 2) }}</td>
@@ -126,7 +99,6 @@
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
                                         <th>Usuario</th>
                                         <th>Bar</th>
                                         <th>Cantidad</th>
@@ -137,7 +109,6 @@
                                 <tbody>
                                     @foreach($recent_movements as $movement)
                                         <tr>
-                                            <td>#{{ $movement->id }}</td>
                                             <td>{{ $movement->user->name }}</td>
                                             <td>{{ $movement->bar->name }}</td>
                                             <td class="text-{{ $movement->amount >= 0 ? 'success' : 'danger' }}">

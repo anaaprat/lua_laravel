@@ -238,14 +238,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
-                        @csrf
-                        <button type="submit" class="nav-link border-0 bg-transparent text-start w-100"
-                            style="color: rgba(255, 255, 255, 0.8);">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Cerrar Sesión
-                        </button>
-                    </form>
+                    <!-- Botón de logout con confirmación -->
+                    <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Cerrar Sesión
+                    </a>
                 </li>
             </ul>
         </nav>
@@ -257,7 +254,6 @@
                 <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
                 <div class="d-flex align-items-center">
                     <span class="text-muted me-3">Bienvenido, {{ auth()->user()->name }}</span>
-                    <span class="badge bg-primary">{{ auth()->user()->role }}</span>
                 </div>
             </div>
         </div>
@@ -279,6 +275,14 @@
             </div>
         @endif
 
+        @if(session('info'))
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                {{ session('info') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
         @if($errors->any())
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
@@ -292,6 +296,39 @@
         @endif
 
         @yield('content')
+    </div>
+
+    <!-- Modal de confirmación de logout -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="logoutModalLabel">
+                        <i class="fas fa-sign-out-alt text-warning"></i>
+                        Confirmar Cierre de Sesión
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-3">
+                        <i class="fas fa-question-circle text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <h6 class="mb-3">¿Estás seguro de que quieres cerrar sesión?</h6>
+                    <p class="text-muted mb-0">Se cerrará tu sesión actual y tendrás que volver a iniciar sesión.</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sí, Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

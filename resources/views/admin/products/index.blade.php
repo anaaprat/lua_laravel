@@ -19,7 +19,6 @@
             <table class="table data-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Nombre</th>
                         <th>Tipo</th>
                         <th>Es Bebida</th>
@@ -32,7 +31,6 @@
                 <tbody>
                     @foreach($products as $product)
                         <tr>
-                            <td>{{ $product->id }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     @if($product->image_url)

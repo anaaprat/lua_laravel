@@ -54,10 +54,8 @@ class RechargeController extends Controller
      */
     public function rechargesUser(Request $request)
     {
-        // Get authenticated bar
         $bar = Auth::user();
 
-        // If search query is provided, find the user
         $user = null;
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -71,9 +69,8 @@ class RechargeController extends Controller
                 ->first();
         }
 
-        // Get recent recharges made by this bar (only positive amounts)
         $recentRecharges = Movement::where('bar_id', $bar->id)
-            ->where('amount', '>', 0) // Only include positive recharges
+            ->where('amount', '>', 0)
             ->with('user')
             ->orderBy('created_at', 'desc')
             ->take(10) // Limit to 10 most recent

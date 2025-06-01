@@ -55,6 +55,9 @@ Route::middleware(['auth', 'role:bar'])->group(function () {
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 
     Route::get('/bar/recharges', [RechargeController::class, 'index'])->name('bar.recharges');
+
+    Route::get('/bar/orders/ajax', [BarController::class, 'getOrdersAjax'])->name('bar.orders.ajax');
+
 });
 
 // Rutas ADMIN

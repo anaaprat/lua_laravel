@@ -7,14 +7,6 @@
     <!-- Estadísticas -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card border-0" style="background: linear-gradient(135deg, #28a745, #20c997);">
-                <div class="card-body text-white text-center">
-                    <h3 class="mb-0">€{{ number_format($stats['total_amount'], 2) }}</h3>
-                    <p class="mb-0"><i class="fas fa-chart-line"></i> Total General</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
             <div class="card border-0" style="background: linear-gradient(135deg, #007bff, #0056b3);">
                 <div class="card-body text-white text-center">
                     <h3 class="mb-0">€{{ number_format($stats['positive_amount'], 2) }}</h3>
@@ -100,7 +92,6 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Usuario</th>
                             <th>Bar</th>
                             <th>Cantidad</th>
@@ -111,7 +102,6 @@
                     <tbody>
                         @forelse($movements as $movement)
                             <tr>
-                                <td>#{{ $movement->id }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-sm me-2">
@@ -173,10 +163,57 @@
                 </table>
             </div>
 
-            <!-- Paginación -->
+            <!-- Paginación mejorada -->
             @if($movements->hasPages())
                 <div class="d-flex justify-content-center mt-4">
-                    {{ $movements->appends(request()->query())->links() }}
+                    <nav aria-label="Navegación de páginas">
+                        <ul class="pagination pagination-sm">
+                            {{-- Enlace anterior --}}
+                            @if ($movements->onFirstPage())
+                                <li class="page-item disabled">
+                                    <span class="page-link">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                </li>
+                            @else
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ $movements->appends(request()->query())->previousPageUrl() }}"
+                                        rel="prev">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            @endif
+
+                            {{-- Enlaces de páginas --}}
+                            @foreach ($movements->appends(request()->query())->getUrlRange(1, $movements->lastPage()) as $page => $url)
+                                @if ($page == $movements->currentPage())
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ $page }}</span>
+                                    </li>
+                                @else
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                                    </li>
+                                @endif
+                            @endforeach
+
+                            {{-- Enlace siguiente --}}
+                            @if ($movements->hasMorePages())
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ $movements->appends(request()->query())->nextPageUrl() }}"
+                                        rel="next">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            @else
+                                <li class="page-item disabled">
+                                    <span class="page-link">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </li>
+                            @endif
+                        </ul>
+                    </nav>
                 </div>
             @endif
         </div>
@@ -198,6 +235,54 @@
             justify-content: center;
             font-size: 12px;
             font-weight: 600;
+        }
+
+        /* Estilos personalizados para la paginación */
+        .pagination {
+            margin-bottom: 0;
+        }
+
+        .pagination .page-link {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin: 0 2px;
+            padding: 8px 12px;
+            color: #6c757d;
+            font-size: 14px;
+            line-height: 1;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+            color: #495057;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color, #84a98c);
+            border-color: var(--primary-color, #84a98c);
+            color: white;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: #fff;
+            border-color: #dee2e6;
+            color: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-link i {
+            font-size: 12px;
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 576px) {
+            .pagination .page-link {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
         }
     </style>
 @endpush

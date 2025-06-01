@@ -156,10 +156,12 @@
             <img src="{{ asset('storage/images/bar2.jpg') }}" alt="Bar 2">
             <img src="{{ asset('storage/images/bar3.jpg') }}" alt="Bar 3">
             <img src="{{ asset('storage/images/bar4.jpg') }}" alt="Bar 4">
+            <img src="{{ asset('storage/images/bar5.jpg') }}" alt="Bar 5">
             <img src="{{ asset('storage/images/bar1.jpg') }}" alt="Bar 1 copy">
             <img src="{{ asset('storage/images/bar2.jpg') }}" alt="Bar 2 copy">
             <img src="{{ asset('storage/images/bar3.jpg') }}" alt="Bar 3 copy">
             <img src="{{ asset('storage/images/bar4.jpg') }}" alt="Bar 4 copy">
+            <img src="{{ asset('storage/images/bar5.jpg') }}" alt="Bar 5 copy">
         </div>
     </div>
 </body>

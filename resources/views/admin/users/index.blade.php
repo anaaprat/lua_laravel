@@ -19,7 +19,6 @@
                 <table class="table data-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Nombre</th>
                             <th>Email</th>
                             <th>Crédito</th>
@@ -31,7 +30,6 @@
                     <tbody>
                         @foreach($users as $user)
                             <tr>
-                                <td>{{ $user->id }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-sm me-2">

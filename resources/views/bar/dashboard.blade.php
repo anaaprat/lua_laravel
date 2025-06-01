@@ -56,7 +56,7 @@
                     <div class="order-item">
                         <div class="order-info">
                             <div class="order-meta">
-                                <span><strong>TABLE {{ $order->user->table_number }}</strong></span>
+                                <span><strong>TABLE {{ $order->table_number }}</strong></span>
                                 <span>{{ $order->created_at->diffForHumans() }}</span>
                             </div>
                             <div class="order-products">
@@ -98,7 +98,7 @@
                     <div class="order-item">
                         <div class="order-info">
                             <div class="order-meta">
-                                <span><strong>TABLE {{ $order->user->table_number }}</strong></span>
+                                <span><strong>TABLE {{ $order->table_number }}</strong></span>
                                 <span>{{ $order->updated_at->diffForHumans() }}</span>
                             </div>
                             <div class="order-products">

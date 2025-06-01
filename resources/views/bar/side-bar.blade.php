@@ -42,13 +42,25 @@
             </div>
         @endif
 
-        <a href="{{ route('logout') }}" class="logout-link"
-            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        <!-- Botón de logout con confirmación -->
+        <a href="#" class="logout-link" onclick="return confirmLogout()">
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>
         </a>
+
+        <!-- Formulario oculto para logout -->
         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
             @csrf
         </form>
     </div>
 </aside>
+
+<script>
+    function confirmLogout() {
+        if (confirm('Are you sure you want to logout?\n\nYour current session will be closed and you will need to log in again.')) {
+            document.getElementById('logout-form').submit();
+            return false;
+        }
+        return false;
+    }
+</script>

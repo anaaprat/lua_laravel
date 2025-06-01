@@ -130,6 +130,59 @@
             font-weight: 500;
         }
 
+        /* Estilos para el contador de mesas */
+        .table-counter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 15px 0;
+        }
+
+        .counter-btn {
+            width: 45px !important;
+            height: 45px;
+            border: none;
+            border-radius: 50%;
+            background: #2f3e46;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .counter-btn:hover {
+            background: #354f52;
+            transform: scale(1.1);
+        }
+
+        .counter-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .counter-btn:disabled:hover {
+            background: #2f3e46;
+        }
+
+        .counter-display {
+            font-size: 1.8rem;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -178,8 +231,17 @@
             </div>
             <div class="form-group">
                 <label for="table_number">Number of tables</label>
-                <input type="number" name="table_number" min="1" max="100" value="{{ old('table_number', 1) }}"
-                    required>
+
+                <!-- Counter con botones + - -->
+                <div class="table-counter">
+                    <button type="button" class="counter-btn" id="decreaseBtn" onclick="changeTableCount(-1)">-</button>
+                    <div class="counter-display" id="tableDisplay">{{ old('table_number', 1) }}</div>
+                    <button type="button" class="counter-btn" id="increaseBtn" onclick="changeTableCount(1)">+</button>
+                </div>
+
+                <!-- Input oculto para enviar el valor -->
+                <input type="hidden" name="table_number" id="tableNumberInput" value="{{ old('table_number', 1) }}">
+
                 <small style="color: rgba(255, 255, 255, 0.6); font-size: 0.8rem;">
                     Define how many tables will be available for your customers.
                 </small>
@@ -191,6 +253,35 @@
             Already have an account? <a href="{{ route('login') }}">Log in</a>
         </div>
     </div>
+
+    <script>
+        let tableCount = {{ old('table_number', 10) }};
+        const minTables = 1;
+        const maxTables = 100;
+
+        function changeTableCount(change) {
+            const newCount = tableCount + change;
+
+            if (newCount >= minTables && newCount <= maxTables) {
+                tableCount = newCount;
+                updateDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('tableDisplay').textContent = tableCount;
+            document.getElementById('tableNumberInput').value = tableCount;
+
+            // Deshabilitar botones si llegamos a los límites
+            document.getElementById('decreaseBtn').disabled = tableCount <= minTables;
+            document.getElementById('increaseBtn').disabled = tableCount >= maxTables;
+        }
+
+        // Inicializar el display al cargar la página
+        document.addEventListener('DOMContentLoaded', function () {
+            updateDisplay();
+        });
+    </script>
 </body>
 
 </html>

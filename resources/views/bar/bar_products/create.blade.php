@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Product</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
@@ -151,6 +152,24 @@
             display: none;
         }
 
+        .alert {
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            border-radius: var(--radius-md);
+        }
+
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-success {
+            background-color: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #86efac;
+        }
+
         @media (max-width: 992px) {
             .form-page {
                 margin-left: var(--sidebar-collapsed);
@@ -231,6 +250,24 @@
                 <h1><i class="fas fa-cocktail"></i> Add Product to My Bar</h1>
             </div>
 
+            {{-- Mostrar errores --}}
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul style="margin: 0; list-style: none; padding: 0;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            {{-- Mostrar mensaje de éxito --}}
+            @if (session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <form action="{{ route('bar-products.store') }}" method="POST">
                 @csrf
 
@@ -239,42 +276,45 @@
                     <select name="product_option" id="product_option" class="form-control" required>
                         <option value="">-- Choose --</option>
                         @foreach ($products as $product)
-                            <option value="{{ $product->id }}">{{ $product->name }}</option>
+                            <option value="{{ $product->id }}" {{ old('product_option') == $product->id ? 'selected' : '' }}>
+                                {{ $product->name }}
+                            </option>
                         @endforeach
-                        <option value="new">➕ Create new product</option>
+                        <option value="new" {{ old('product_option') == 'new' ? 'selected' : '' }}>➕ Create new product
+                        </option>
                     </select>
                 </div>
 
-                <div id="new-product-fields" class="hidden">
+                <div id="new-product-fields" class="{{ old('product_option') == 'new' ? '' : 'hidden' }}">
                     <div class="section-title">
                         <i class="fas fa-plus-circle"></i> New Product Details
                     </div>
 
                     <div class="form-group">
                         <label>Product Name:</label>
-                        <input type="text" name="product_name" class="form-control">
+                        <input type="text" name="product_name" class="form-control" value="{{ old('product_name') }}">
                     </div>
 
                     <div class="form-group">
                         <label>Description:</label>
-                        <textarea name="description" rows="2" class="form-control"></textarea>
+                        <textarea name="description" rows="2" class="form-control">{{ old('description') }}</textarea>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label>Type:</label>
                             <select name="type" class="form-control">
-                                <option value="food">Food</option>
-                                <option value="drink">Drink</option>
-                                <option value="other">Other</option>
+                                <option value="food" {{ old('type') == 'food' ? 'selected' : '' }}>Food</option>
+                                <option value="drink" {{ old('type') == 'drink' ? 'selected' : '' }}>Drink</option>
+                                <option value="other" {{ old('type') == 'other' ? 'selected' : '' }}>Other</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label>Is it a drink?</label>
+                            <label>Is it a drink? (for rankings)</label>
                             <select name="is_drink" class="form-control">
-                                <option value="1">Yes</option>
-                                <option value="0">No</option>
+                                <option value="1" {{ old('is_drink') == '1' ? 'selected' : '' }}>Yes</option>
+                                <option value="0" {{ old('is_drink') == '0' ? 'selected' : '' }}>No</option>
                             </select>
                         </div>
                     </div>
@@ -283,26 +323,27 @@
                 </div>
 
                 <div class="section-title">
-                    <i class="fas fa-tag"></i> Product Details
+                    <i class="fas fa-tag"></i> Product Details for Your Bar
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>Price (€):</label>
-                        <input type="number" name="price" step="0.01" class="form-control" required>
+                        <input type="number" name="price" step="0.01" class="form-control" value="{{ old('price') }}"
+                            required>
                     </div>
 
                     <div class="form-group">
                         <label>Stock:</label>
-                        <input type="number" name="stock" class="form-control" required>
+                        <input type="number" name="stock" class="form-control" value="{{ old('stock') }}" required>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Is it alcoholic?</label>
-                    <select name="es_copa" class="form-control">
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
+                    <label>Available for ordering:</label>
+                    <select name="available" class="form-control" required>
+                        <option value="1" {{ old('available') == '1' ? 'selected' : '' }}>Yes - Available</option>
+                        <option value="0" {{ old('available') == '0' ? 'selected' : '' }}>No - Not available</option>
                     </select>
                 </div>
 
@@ -322,6 +363,13 @@
                 newFields.classList.remove('hidden');
             } else {
                 newFields.classList.add('hidden');
+            }
+        });
+
+        // Mantener estado si hay errores
+        document.addEventListener('DOMContentLoaded', function () {
+            if (selector.value === 'new') {
+                newFields.classList.remove('hidden');
             }
         });
     </script>

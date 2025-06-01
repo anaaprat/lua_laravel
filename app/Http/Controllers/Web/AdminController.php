@@ -8,12 +8,14 @@ use App\Models\Product;
 use App\Models\Movement;
 use App\Models\Order;
 use App\Models\BarProduct;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
@@ -21,8 +23,8 @@ class AdminController extends Controller
     public function dashboard()
     {
         $stats = [
-            'total_users' => User::where('role', 'user')->count(),
-            'total_bars' => User::where('role', 'bar')->count(),
+            'total_users' => User::where('role', 'user')->where('deleted', 0)->count(),
+            'total_bars' => User::where('role', 'bar')->where('deleted', 0)->count(),
             'total_products' => Product::count(),
             'total_orders' => Order::count(),
             'total_movements' => Movement::sum('amount'),
@@ -44,7 +46,11 @@ class AdminController extends Controller
     // ================ GESTIÓN DE USUARIOS ================
     public function users()
     {
-        $users = User::where('role', 'user')->get();
+        $users = User::where('role', 'user')
+            ->where('deleted', 0)
+            ->orderBy('created_at', 'desc')
+            ->paginate(25);
+
         return view('admin.users.index', compact('users'));
     }
 
@@ -110,12 +116,55 @@ class AdminController extends Controller
         return redirect()->route('admin.users')->with('success', 'Usuario actualizado correctamente');
     }
 
+
     public function deleteUser($id)
     {
         $user = User::where('role', 'user')->findOrFail($id);
-        $user->update(['deleted' => true, 'is_active' => false]);
 
-        return redirect()->route('admin.users')->with('success', 'Usuario eliminado correctamente');
+        try {
+            DB::beginTransaction();
+
+            $pendingOrders = Order::where('user_id', $id)->where('status', 'pending')->get();
+
+            foreach ($pendingOrders as $order) {
+                foreach ($order->items as $item) {
+                    $barProduct = BarProduct::where('user_id', $order->bar_id)
+                        ->where('product_id', $item->product_id)
+                        ->first();
+
+                    if ($barProduct) {
+                        $barProduct->stock += $item->quantity;
+                        $barProduct->save();
+                    }
+                }
+
+                $order->update(['status' => 'canceled']);
+            }
+
+            // 2. ELIMINAR DEL RANKING
+            if (class_exists('App\Models\Ranking')) {
+                $rankingsCount = DB::table('ranking_users')->where('user_id', $id)->count();
+                DB::table('ranking_users')->where('user_id', $id)->delete();
+            }
+            $user->update([
+                'deleted' => true,
+                'is_active' => false,
+                'email' => $user->email . '_deleted_' . time(),
+                'token' => null
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.users')->with('success', 'Usuario eliminado correctamente');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->route('admin.users')->with(
+                'error',
+                'Error al eliminar el usuario: ' . $e->getMessage()
+            );
+        }
     }
 
     public function toggleUserStatus($id)
@@ -130,7 +179,11 @@ class AdminController extends Controller
     // ================ GESTIÓN DE BARES ================
     public function bars()
     {
-        $bars = User::where('role', 'bar')->get();
+        $bars = User::where('role', 'bar')
+            ->where('deleted', 0)
+            ->orderBy('created_at', 'desc')
+            ->paginate(25);
+
         return view('admin.bars.index', compact('bars'));
     }
 
@@ -205,12 +258,155 @@ class AdminController extends Controller
         return redirect()->route('admin.bars')->with('success', 'Bar actualizado correctamente');
     }
 
+    // En AdminController.php
     public function deleteBar($id)
     {
         $bar = User::where('role', 'bar')->findOrFail($id);
-        $bar->update(['deleted' => true, 'is_active' => false]);
 
-        return redirect()->route('admin.bars')->with('success', 'Bar eliminado correctamente');
+        try {
+            DB::beginTransaction();
+
+            $pendingOrders = Order::where('bar_id', $id)->where('status', 'pending')->get();
+
+            foreach ($pendingOrders as $order) {
+                Log::info('Cancelando pedido pendiente', ['order_id' => $order->id]);
+
+                // Restaurar stock de productos
+                foreach ($order->items as $item) {
+                    $barProduct = BarProduct::where('user_id', $id)
+                        ->where('product_id', $item->product_id)
+                        ->first();
+
+                    if ($barProduct) {
+                        $barProduct->stock += $item->quantity;
+                        $barProduct->save();
+                        Log::info('Stock restaurado', [
+                            'product_id' => $item->product_id,
+                            'quantity_restored' => $item->quantity,
+                            'new_stock' => $barProduct->stock
+                        ]);
+                    }
+                }
+
+                // Reembolsar al usuario
+                if ($order->user && !$order->user->deleted) {
+                    $order->user->credit += $order->total;
+                    $order->user->save();
+
+                    // Crear movimiento de reembolso
+                    Movement::create([
+                        'user_id' => $order->user_id,
+                        'bar_id' => $id,
+                        'amount' => $order->total,
+                        'description' => 'Reembolso por eliminación de bar'
+                    ]);
+
+                    Log::info('Usuario reembolsado', [
+                        'user_id' => $order->user_id,
+                        'refund_amount' => $order->total,
+                        'new_balance' => $order->user->credit
+                    ]);
+                }
+
+                // Revertir puntos de ranking si había bebidas
+                $this->revertRankingPointsForOrder($order);
+            }
+
+            // Eliminar todos los pedidos del bar (pendientes, completados, cancelados)
+            $totalOrders = Order::where('bar_id', $id)->count();
+            Order::where('bar_id', $id)->delete();
+            Log::info('Pedidos eliminados', ['total_orders_deleted' => $totalOrders]);
+
+            // 2. ELIMINAR RELACIONES BAR-PRODUCTOS
+            $totalBarProducts = BarProduct::where('user_id', $id)->count();
+            BarProduct::where('user_id', $id)->delete();
+            Log::info('Productos del bar eliminados', ['total_bar_products_deleted' => $totalBarProducts]);
+
+            // 3. ELIMINAR MOVIMIENTOS RELACIONADOS
+            $totalMovements = Movement::where('bar_id', $id)->count();
+            Movement::where('bar_id', $id)->delete();
+            Log::info('Movimientos eliminados', ['total_movements_deleted' => $totalMovements]);
+
+            // 4. ELIMINAR ARCHIVO QR SI EXISTE
+            if ($bar->qr_path && Storage::disk('public')->exists($bar->qr_path)) {
+                Storage::disk('public')->delete($bar->qr_path);
+                Log::info('Código QR eliminado', ['qr_path' => $bar->qr_path]);
+            }
+
+            // 5. MARCAR BAR COMO ELIMINADO
+            $bar->update([
+                'deleted' => true,
+                'is_active' => false,
+                'token' => null, // Invalidar token para evitar accesos
+                'qr_path' => null
+            ]);
+
+            DB::commit();
+
+            Log::info('Bar eliminado exitosamente en cascada', [
+                'bar_id' => $id,
+                'orders_deleted' => $totalOrders,
+                'bar_products_deleted' => $totalBarProducts,
+                'movements_deleted' => $totalMovements
+            ]);
+
+            return redirect()->route('admin.bars')->with(
+                'success',
+                "Bar eliminado correctamente. Se eliminaron {$totalOrders} pedidos, {$totalBarProducts} productos y {$totalMovements} movimientos."
+            );
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Error eliminando bar en cascada', [
+                'bar_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->route('admin.bars')->with(
+                'error',
+                'Error al eliminar el bar: ' . $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Revertir puntos de ranking para un pedido
+     */
+    private function revertRankingPointsForOrder($order)
+    {
+        if (!class_exists('App\Models\Ranking')) {
+            return;
+        }
+
+        try {
+            foreach ($order->items as $item) {
+                if ($item->product && $item->product->is_drink) {
+                    $rankings = DB::table('ranking_users')
+                        ->where('user_id', $order->user_id)
+                        ->get();
+
+                    foreach ($rankings as $ranking) {
+                        DB::table('ranking_users')
+                            ->where('ranking_id', $ranking->ranking_id)
+                            ->where('user_id', $order->user_id)
+                            ->decrement('points', $item->quantity);
+
+                        Log::info('Puntos de ranking revertidos', [
+                            'user_id' => $order->user_id,
+                            'ranking_id' => $ranking->ranking_id,
+                            'points_removed' => $item->quantity
+                        ]);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Error revirtiendo puntos de ranking', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function toggleBarStatus($id)
@@ -236,17 +432,83 @@ class AdminController extends Controller
 
     public function storeProduct(Request $request)
     {
+        Log::info('=== CREANDO PRODUCTO ===');
+        Log::info('Datos recibidos:', $request->all());
+        Log::info('Archivos recibidos:' . $request->hasFile('image_file') ? 'SÍ' : 'NO');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:1000',
             'type' => 'required|string|max:255',
             'is_drink' => 'required|boolean',
-            'image_url' => 'nullable|url',
+            'image_url' => 'nullable|url|max:500',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // 2MB máximo
         ]);
 
-        Product::create($validated);
+        Log::info('Datos validados:', $validated);
 
-        return redirect()->route('admin.products')->with('success', 'Producto creado correctamente');
+        $imageUrl = null;
+
+        try {
+            // Priorizar archivo subido sobre URL
+            if ($request->hasFile('image_file')) {
+                Log::info('Procesando archivo de imagen...');
+
+                $image = $request->file('image_file');
+                Log::info('Archivo de imagen:', [
+                    'name' => $image->getClientOriginalName(),
+                    'size' => $image->getSize(),
+                    'mime' => $image->getMimeType(),
+                ]);
+
+                // Generar nombre único para evitar conflictos
+                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+                // Crear directorio si no existe
+                if (!Storage::disk('public')->exists('products')) {
+                    Storage::disk('public')->makeDirectory('products');
+                    Log::info('Directorio products creado');
+                }
+
+                // Guardar en storage/app/public/products
+                $imagePath = $image->storeAs('products', $imageName, 'public');
+                Log::info('Imagen guardada en:' . $imagePath);
+
+                // URL completa para acceder a la imagen
+                $imageUrl = asset('storage/' . $imagePath);
+                Log::info('URL de imagen generada:' . $imageUrl);
+
+            } elseif (!empty($validated['image_url'])) {
+                // Si no hay archivo, usar URL proporcionada
+                $imageUrl = $validated['image_url'];
+                Log::info('Usando URL proporcionada:', $imageUrl);
+            }
+
+            // Crear el producto
+            $product = Product::create([
+                'name' => $validated['name'],
+                'description' => $validated['description'],
+                'type' => $validated['type'],
+                'is_drink' => $validated['is_drink'],
+                'image_url' => $imageUrl,
+            ]);
+
+            Log::info('Producto creado exitosamente:', $product->toArray());
+
+            return redirect()->route('admin.products')->with('success', 'Producto creado correctamente');
+
+        } catch (\Exception $e) {
+            Log::error('Error creando producto:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error al crear el producto: ' . $e->getMessage());
+        }
     }
 
     public function editProduct($id)
@@ -259,17 +521,82 @@ class AdminController extends Controller
     {
         $product = Product::findOrFail($id);
 
+        Log::info('=== ACTUALIZANDO PRODUCTO ===');
+        Log::info('Producto ID:', $id);
+        Log::info('Datos recibidos:', $request->all());
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:1000',
             'type' => 'required|string|max:255',
             'is_drink' => 'required|boolean',
-            'image_url' => 'nullable|url',
+            'image_url' => 'nullable|url|max:500',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $product->update($validated);
+        try {
+            $imageUrl = $product->image_url; // Mantener imagen actual por defecto
 
-        return redirect()->route('admin.products')->with('success', 'Producto actualizado correctamente');
+            // Procesar nueva imagen si se proporciona
+            if ($request->hasFile('image_file')) {
+                Log::info('Procesando nueva imagen...');
+
+                // Eliminar imagen anterior si existe y es de nuestro storage
+                if ($product->image_url && str_contains($product->image_url, 'storage/products/')) {
+                    $oldImagePath = str_replace(asset('storage/'), '', $product->image_url);
+                    if (Storage::disk('public')->exists($oldImagePath)) {
+                        Storage::disk('public')->delete($oldImagePath);
+                        Log::info('Imagen anterior eliminada:', $oldImagePath);
+                    }
+                }
+
+                $image = $request->file('image_file');
+                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $imagePath = $image->storeAs('products', $imageName, 'public');
+                $imageUrl = asset('storage/' . $imagePath);
+
+                Log::info('Nueva imagen guardada:' . $imageUrl);
+
+            } elseif (!empty($validated['image_url']) && $validated['image_url'] !== $product->image_url) {
+                // Si se proporciona nueva URL y es diferente a la actual
+
+                // Eliminar imagen anterior si era de nuestro storage
+                if ($product->image_url && str_contains($product->image_url, 'storage/products/')) {
+                    $oldImagePath = str_replace(asset('storage/'), '', $product->image_url);
+                    if (Storage::disk('public')->exists($oldImagePath)) {
+                        Storage::disk('public')->delete($oldImagePath);
+                        Log::info('Imagen anterior eliminada por nueva URL');
+                    }
+                }
+
+                $imageUrl = $validated['image_url'];
+                Log::info('Usando nueva URL:', $imageUrl);
+            }
+
+            // Actualizar producto
+            $product->update([
+                'name' => $validated['name'],
+                'description' => $validated['description'],
+                'type' => $validated['type'],
+                'is_drink' => $validated['is_drink'],
+                'image_url' => $imageUrl,
+            ]);
+
+            Log::info('Producto actualizado exitosamente');
+
+            return redirect()->route('admin.products')->with('success', 'Producto actualizado correctamente');
+
+        } catch (\Exception $e) {
+            Log::error('Error actualizando producto:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error al actualizar el producto: ' . $e->getMessage());
+        }
     }
 
     public function deleteProduct($id)
@@ -284,9 +611,23 @@ class AdminController extends Controller
                 ->with('error', 'No se puede eliminar el producto porque está siendo usado en bares');
         }
 
-        $product->delete();
+        try {
+            // Eliminar imagen si existe y es de nuestro storage
+            if ($product->image_url && str_contains($product->image_url, 'storage/products/')) {
+                $imagePath = str_replace(asset('storage/'), '', $product->image_url);
+                if (Storage::disk('public')->exists($imagePath)) {
+                    Storage::disk('public')->delete($imagePath);
+                }
+            }
 
-        return redirect()->route('admin.products')->with('success', 'Producto eliminado correctamente');
+            $product->delete();
+
+            return redirect()->route('admin.products')->with('success', 'Producto eliminado correctamente');
+
+        } catch (\Exception $e) {
+            return redirect()->route('admin.products')
+                ->with('error', 'Error al eliminar el producto: ' . $e->getMessage());
+        }
     }
 
     // ================ VISUALIZACIÓN DE MOVIMIENTOS ================
@@ -360,6 +701,7 @@ class AdminController extends Controller
         return view('admin.orders.index', compact('orders', 'bars', 'stats'));
     }
 
+    // ================ GESTIÓN DE RANKINGS ================
     public function rankings()
     {
         $rankings = \App\Models\Ranking::with([

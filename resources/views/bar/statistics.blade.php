@@ -217,7 +217,7 @@
                     @forelse ($orders as $order)
                         <tr>
                             <td>{{ $order->user->name }}</td>
-                            <td>{{ $order->user->table_number }}</td>
+                            <td>{{ $order->table_number }}</td>
                             <td>
                                 @foreach ($order->items as $item)
                                     {{ $item->quantity }}x {{ $item->product->name ?? 'Product' }}

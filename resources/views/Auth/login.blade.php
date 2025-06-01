@@ -97,9 +97,9 @@
         }
 
         .error {
-            color: #ffb3b3;
+            color: rgb(177, 43, 43);
             font-size: 0.9rem;
-            margin-top: 0.5rem;
+            padding: 0.5rem;
             text-align: center;
         }
 

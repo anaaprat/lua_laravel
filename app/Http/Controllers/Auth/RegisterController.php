@@ -17,7 +17,6 @@ class RegisterController extends Controller
         return view('auth.register');
     }
 
-    // En RegisterController.php, dentro del método register:
 
     public function register(Request $request)
     {
@@ -25,20 +24,18 @@ class RegisterController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|confirmed|min:6',
-            'table_number' => 'required|integer|min:1|max:100', // Añadir validación para número de mesas
+            'table_number' => 'required|integer|min:1|max:100',
         ]);
 
-        // Generar token único
-        $token = Str::uuid();
+        $token = Str::uuid()->toString();
 
-        // Crear usuario con rol bar
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'bar',
             'token' => $token,
-            'table_number' => $validated['table_number'], // Guardar el número de mesas
+            'table_number' => $validated['table_number'],
         ]);
 
         $qr = QrCode::format('svg')->size(300)->generate($token);

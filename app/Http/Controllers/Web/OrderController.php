@@ -39,7 +39,6 @@ class OrderController extends Controller
         $items = $request->items;
         $tableNumber = $request->table_number;
 
-        // Validar que el bar existe y está activo
         $bar = User::where('id', $barId)
             ->where('role', 'bar')
             ->where('is_active', 1)
@@ -52,14 +51,12 @@ class OrderController extends Controller
             ], 404);
         }
 
-        // Validar que el número de mesa no excede las disponibles en el bar
         if ($bar->table_number && $tableNumber > $bar->table_number) {
             return response()->json([
                 'message' => 'Número de mesa no válido para este bar',
             ], 422);
         }
 
-        // Calcular el total del pedido y validar disponibilidad de productos
         $total = 0;
         $orderItems = [];
         $productDetails = [];
@@ -78,7 +75,6 @@ class OrderController extends Controller
                     throw new \Exception("Producto no disponible en este bar: {$item['product_id']}");
                 }
 
-                // Verificar stock
                 if ($barProduct->stock < $item['quantity']) {
                     throw new \Exception("Stock insuficiente para el producto: {$barProduct->product->name}");
                 }
@@ -98,12 +94,10 @@ class OrderController extends Controller
                 ];
             }
 
-            // Verificar saldo suficiente
             if ($user->credit < $total) {
                 throw new \Exception("Saldo insuficiente. Necesitas {$total} €, pero solo tienes {$user->credit} €");
             }
 
-            // Crear el pedido
             $order = Order::create([
                 'user_id' => $user->id,
                 'bar_id' => $barId,
@@ -111,7 +105,6 @@ class OrderController extends Controller
                 'status' => 'pending'
             ]);
 
-            // Crear los items del pedido
             foreach ($orderItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -121,18 +114,15 @@ class OrderController extends Controller
                 ]);
             }
 
-            // Registrar el movimiento (pago)
             Movement::create([
                 'user_id' => $user->id,
                 'bar_id' => $barId,
-                'amount' => -$total // Monto negativo porque es un pago
+                'amount' => -$total
             ]);
 
-            // Actualizar el saldo del usuario
             $user->credit -= $total;
             $user->save();
 
-            // Reducir stock de productos
             foreach ($productDetails as $detail) {
                 $detail['barProduct']->stock -= $detail['quantity'];
                 $detail['barProduct']->save();
@@ -140,15 +130,12 @@ class OrderController extends Controller
 
             if (class_exists('App\Models\Ranking')) {
                 foreach ($productDetails as $detail) {
-                    // Si el producto es una bebida, sumar puntos en rankings
                     if ($detail['barProduct']->product->is_drink) {
-                        // Buscar todos los rankings a los que pertenece el usuario
                         $rankings = DB::table('ranking_users')
                             ->where('user_id', $user->id)
                             ->get();
 
                         foreach ($rankings as $ranking) {
-                            // Actualizar puntos
                             DB::table('ranking_users')
                                 ->where('ranking_id', $ranking->ranking_id)
                                 ->where('user_id', $user->id)
@@ -160,7 +147,6 @@ class OrderController extends Controller
 
             DB::commit();
 
-            // Cargar los detalles completos del pedido
             $order = Order::with(['bar:id,name', 'items.product'])
                 ->find($order->id);
 
@@ -183,26 +169,44 @@ class OrderController extends Controller
     {
         if ($order->bar_id !== auth()->id())
             abort(403);
+
         $order->status = 'completed';
         $order->save();
-        return back();
+
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Order completed successfully']);
+        }
+
+        return back()->with('success', 'Order completed successfully');
     }
 
     public function markAsPending(Order $order)
     {
         if ($order->bar_id !== auth()->id())
             abort(403);
+
         $order->status = 'pending';
         $order->save();
-        return back();
+
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Order moved to pending']);
+        }
+
+        return back()->with('success', 'Order moved to pending');
     }
 
     public function cancel(Order $order)
     {
         if ($order->bar_id !== auth()->id())
             abort(403);
+
         $order->status = 'canceled';
         $order->save();
-        return back();
+
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Order canceled']);
+        }
+
+        return back()->with('success', 'Order canceled');
     }
 }
