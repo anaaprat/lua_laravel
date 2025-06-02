@@ -89,12 +89,16 @@
             width: 100%;
             position: absolute;
             bottom: 30px;
+            height: 150px;
         }
 
         .slider-track {
             display: flex;
-            width: calc(250px * 10);
-            animation: scroll 30s linear infinite;
+            /* Calculamos el ancho total: 5 imágenes originales + 5 duplicadas = 10 imágenes */
+            /* Cada imagen: 250px + 20px de margin = 270px */
+            width: calc(270px * 15);
+            /* 15 imágenes para asegurar continuidad */
+            animation: scroll 45s linear infinite;
         }
 
         .slider-track img {
@@ -104,6 +108,8 @@
             border-radius: 10px;
             margin: 0 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+            /* Evita que las imágenes se compriman */
         }
 
         @keyframes fadeIn {
@@ -136,7 +142,40 @@
             }
 
             100% {
-                transform: translateX(-50%);
+                /* Movemos exactamente la mitad del contenido para crear loop perfecto */
+                transform: translateX(calc(-270px * 5));
+            }
+        }
+
+        /* Pausa la animación al hacer hover */
+        .slider:hover .slider-track {
+            animation-play-state: paused;
+        }
+
+        @media (max-width: 768px) {
+            .slogan {
+                font-size: 1.2rem;
+                padding: 10px 30px;
+            }
+
+            .slider-track img {
+                width: 200px;
+                height: 120px;
+            }
+
+            .slider-track {
+                width: calc(220px * 15);
+                animation-duration: 40s;
+            }
+
+            @keyframes scroll {
+                0% {
+                    transform: translateX(0);
+                }
+
+                100% {
+                    transform: translateX(calc(-220px * 5));
+                }
             }
         }
     </style>
@@ -158,11 +197,18 @@
             <img src="{{ asset('storage/images/bar3.jpg') }}" alt="Bar 3">
             <img src="{{ asset('storage/images/bar4.jpg') }}" alt="Bar 4">
             <img src="{{ asset('storage/images/bar5.jpg') }}" alt="Bar 5">
-            <img src="{{ asset('storage/images/bar1.jpg') }}" alt="Bar 1 copy">
-            <img src="{{ asset('storage/images/bar2.jpg') }}" alt="Bar 2 copy">
-            <img src="{{ asset('storage/images/bar3.jpg') }}" alt="Bar 3 copy">
-            <img src="{{ asset('storage/images/bar4.jpg') }}" alt="Bar 4 copy">
-            <img src="{{ asset('storage/images/bar5.jpg') }}" alt="Bar 5 copy">
+
+            <img src="{{ asset('storage/images/bar1.jpg') }}" alt="Bar 1">
+            <img src="{{ asset('storage/images/bar2.jpg') }}" alt="Bar 2">
+            <img src="{{ asset('storage/images/bar3.jpg') }}" alt="Bar 3">
+            <img src="{{ asset('storage/images/bar4.jpg') }}" alt="Bar 4">
+            <img src="{{ asset('storage/images/bar5.jpg') }}" alt="Bar 5">
+
+            <img src="{{ asset('storage/images/bar1.jpg') }}" alt="Bar 1">
+            <img src="{{ asset('storage/images/bar2.jpg') }}" alt="Bar 2">
+            <img src="{{ asset('storage/images/bar3.jpg') }}" alt="Bar 3">
+            <img src="{{ asset('storage/images/bar4.jpg') }}" alt="Bar 4">
+            <img src="{{ asset('storage/images/bar5.jpg') }}" alt="Bar 5">
         </div>
     </div>
 </body>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -25,7 +26,8 @@ class User extends Authenticatable
         'token',
         'credit',
         'is_active',
-        'deleted'
+        'deleted',
+        'table_number'
     ];
 
     /**
@@ -53,5 +55,13 @@ class User extends Authenticatable
         return $this->belongsToMany(Ranking::class, 'ranking_users')
             ->withPivot('points', 'month_record')
             ->withTimestamps();
+    }
+
+    /**
+     * Enviar notificación de reset de contraseña personalizada
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

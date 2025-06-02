@@ -17,7 +17,6 @@ class RegisterController extends Controller
         return view('auth.register');
     }
 
-
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -45,7 +44,6 @@ class RegisterController extends Controller
         $user->qr_path = $filePath;
         $user->save();
 
-        auth()->login($user);
-        return redirect()->route('bar.dashboard');
+        return redirect()->route('login')->with('success', 'Account created successfully! Wait for the administrator to activate your account to access the dashboard.');
     }
-}
+}   

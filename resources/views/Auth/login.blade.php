@@ -89,16 +89,61 @@
             border-radius: 8px;
             font-weight: 500;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
             font-size: 1rem;
+            position: relative;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             background: #354f52;
+        }
+
+        /* 🔒 Estilos para botón deshabilitado */
+        button:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* ⏳ Spinner de carga */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        button:disabled .spinner {
+            display: inline-block;
+        }
+
+        button:disabled .button-text {
+            opacity: 0.8;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .error {
             color: rgb(177, 43, 43);
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .success {
+            color: rgb(34, 197, 94);
             font-size: 0.9rem;
             padding: 0.5rem;
             text-align: center;
@@ -111,6 +156,25 @@
             border-radius: 50%;
             margin-bottom: 40px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .forgot-password a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            opacity: 1;
+            text-decoration: underline;
         }
 
         .register-redirect {
@@ -144,25 +208,69 @@
     <img src="{{ asset('storage/images/lualogo.jpeg') }}" alt="Lua Logo" class="logo">
     <div class="login-box">
         <h2>Login to your account</h2>
+
+        @if (session('status'))
+            <div class="success">{{ session('status') }}</div>
+        @endif
+
         @if (session('error'))
             <div class="error">{{ session('error') }}</div>
         @endif
-        <form method="POST" action="{{ route('login.post') }}">
+
+        <form method="POST" action="{{ route('login.post') }}" id="loginForm">
             @csrf
             <div class="form-group">
                 <label for="email">Email address</label>
-                <input type="email" name="email" required>
+                <input type="email" name="email" id="email" required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" required>
+                <input type="password" name="password" id="password" required>
             </div>
-            <button type="submit">Login</button>
+            <button type="submit" id="loginButton">
+                <span class="spinner"></span>
+                <span class="button-text">Login</span>
+            </button>
         </form>
+
+        <div class="forgot-password">
+            <a href="{{ route('password.request') }}">Forgot your password?</a>
+        </div>
+
         <div class="register-redirect">
             Don't have an account? <a href="{{ route('register') }}">Register you bar here</a>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('loginForm');
+            const button = document.getElementById('loginButton');
+            const buttonText = button.querySelector('.button-text');
+
+            form.addEventListener('submit', function (e) {
+                if (button.disabled) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                button.disabled = true;
+                buttonText.textContent = 'Logging in...';
+
+                setTimeout(function () {
+                    if (button.disabled) {
+                        button.disabled = false;
+                        buttonText.textContent = 'Login';
+                    }
+                }, 10000);
+            });
+
+            if (document.querySelector('.error')) {
+                button.disabled = false;
+                buttonText.textContent = 'Login';
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -95,16 +95,54 @@
             border-radius: 8px;
             font-weight: 500;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
             font-size: 1rem;
+            position: relative;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             background: #354f52;
         }
 
+        /* 🔒 Estilos para botón deshabilitado */
+        button:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* ⏳ Spinner de carga */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        button:disabled .spinner {
+            display: inline-block;
+        }
+
+        button:disabled .button-text {
+            opacity: 0.8;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         .error {
-            color: #ffb3b3;
+            color: rgb(160, 39, 39);
             font-size: 0.85rem;
             margin-top: 0.5rem;
             text-align: center;
@@ -157,7 +195,7 @@
             padding: 0;
         }
 
-        .counter-btn:hover {
+        .counter-btn:hover:not(:disabled) {
             background: #354f52;
             transform: scale(1.1);
         }
@@ -212,23 +250,23 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('register.post') }}">
+        <form method="POST" action="{{ route('register.post') }}" id="registerForm">
             @csrf
             <div class="form-group">
                 <label for="name">Bar name</label>
-                <input type="text" name="name" required>
+                <input type="text" name="name" id="name" required>
             </div>
             <div class="form-group">
                 <label for="email">Email address</label>
-                <input type="email" name="email" required>
+                <input type="email" name="email" id="email" required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" required>
+                <input type="password" name="password" id="password" required>
             </div>
             <div class="form-group">
                 <label for="password_confirmation">Confirm password</label>
-                <input type="password" name="password_confirmation" required>
+                <input type="password" name="password_confirmation" id="password_confirmation" required>
             </div>
             <div class="form-group">
                 <label for="table_number">Number of tables</label>
@@ -245,7 +283,10 @@
                     Define how many tables will be available for your customers.
                 </small>
             </div>
-            <button type="submit">Register</button>
+            <button type="submit" id="registerButton">
+                <span class="spinner"></span>
+                <span class="button-text">Register</span>
+            </button>
         </form>
 
         <div class="login-redirect">
@@ -277,6 +318,32 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             updateDisplay();
+
+            const form = document.getElementById('registerForm');
+            const button = document.getElementById('registerButton');
+            const buttonText = button.querySelector('.button-text');
+
+            form.addEventListener('submit', function (e) {
+                if (button.disabled) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                button.disabled = true;
+                buttonText.textContent = 'Registering...';
+
+                setTimeout(function () {
+                    if (button.disabled) {
+                        button.disabled = false;
+                        buttonText.textContent = 'Register';
+                    }
+                }, 15000);
+            });
+
+            if (document.querySelector('.error')) {
+                button.disabled = false;
+                buttonText.textContent = 'Register';
+            }
         });
     </script>
 </body>
