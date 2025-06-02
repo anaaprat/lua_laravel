@@ -161,115 +161,60 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 });
 
-// Route::get('/debug-symlink', function () {
-//     $publicStorage = public_path('storage');
-//     $storagePublic = storage_path('app/public');
+Route::get('/debug-symlink', function () {
+    $publicStorage = public_path('storage');
+    $storagePublic = storage_path('app/public');
 
-//     echo "Public storage path: " . $publicStorage . "<br>";
-//     echo "Storage public path: " . $storagePublic . "<br>";
-//     echo "Public storage exists: " . (file_exists($publicStorage) ? 'YES' : 'NO') . "<br>";
-//     echo "Is symlink: " . (is_link($publicStorage) ? 'YES' : 'NO') . "<br>";
+    echo "Public storage path: " . $publicStorage . "<br>";
+    echo "Storage public path: " . $storagePublic . "<br>";
+    echo "Public storage exists: " . (file_exists($publicStorage) ? 'YES' : 'NO') . "<br>";
+    echo "Is symlink: " . (is_link($publicStorage) ? 'YES' : 'NO') . "<br>";
 
-//     if (is_link($publicStorage)) {
-//         echo "Symlink target: " . readlink($publicStorage) . "<br>";
-//         echo "Target exists: " . (file_exists(readlink($publicStorage)) ? 'YES' : 'NO') . "<br>";
-//     }
+    if (is_link($publicStorage)) {
+        echo "Symlink target: " . readlink($publicStorage) . "<br>";
+        echo "Target exists: " . (file_exists(readlink($publicStorage)) ? 'YES' : 'NO') . "<br>";
+    }
 
-//     // Verificar archivo específico
-//     $qrFile = $storagePublic . '/qrs/bar_lua10.svg';
-//     echo "QR file exists in storage: " . (file_exists($qrFile) ? 'YES' : 'NO') . "<br>";
+    $qrFile = $storagePublic . '/qrs/bar_lua10.svg';
+    echo "QR file exists in storage: " . (file_exists($qrFile) ? 'YES' : 'NO') . "<br>";
 
-//     return "";
-// });
+    return "";
+});
 
-// Route::get('/railway-setup', function () {
-//     try {
-//         // Eliminar carpeta storage (no enlace)
-//         $publicStorage = public_path('storage');
-//         if (file_exists($publicStorage)) {
-//             // Eliminar recursivamente toda la carpeta
-//             function deleteDirectory($dir)
-//             {
-//                 if (!file_exists($dir))
-//                     return true;
-//                 if (!is_dir($dir))
-//                     return unlink($dir);
-//                 foreach (scandir($dir) as $item) {
-//                     if ($item == '.' || $item == '..')
-//                         continue;
-//                     if (!deleteDirectory($dir . DIRECTORY_SEPARATOR . $item))
-//                         return false;
-//                 }
-//                 return rmdir($dir);
-//             }
-//             deleteDirectory($publicStorage);
-//             echo "✅ Removed old storage directory<br>";
-//         }
+Route::get('/railway-setup', function () {
+    try {
+        $publicStorage = public_path('storage');
+        if (file_exists($publicStorage)) {
+            function deleteDirectory($dir)
+            {
+                if (!file_exists($dir))
+                    return true;
+                if (!is_dir($dir))
+                    return unlink($dir);
+                foreach (scandir($dir) as $item) {
+                    if ($item == '.' || $item == '..')
+                        continue;
+                    if (!deleteDirectory($dir . DIRECTORY_SEPARATOR . $item))
+                        return false;
+                }
+                return rmdir($dir);
+            }
+            deleteDirectory($publicStorage);
+            echo "✅ Removed old storage directory<br>";
+        }
 
-//         // Crear enlace simbólico
-//         Artisan::call('storage:link', ['--force' => true]);
-//         echo "✅ Storage symlink created<br>";
+        Artisan::call('storage:link', ['--force' => true]);
+        echo "✅ Storage symlink created<br>";
 
-//         // Verificar que es enlace
-//         if (is_link($publicStorage)) {
-//             echo "✅ Confirmed: Is now a symlink<br>";
-//         } else {
-//             echo "❌ Still not a symlink<br>";
-//         }
+        if (is_link($publicStorage)) {
+            echo "✅ Confirmed: Is now a symlink<br>";
+        } else {
+            echo "❌ Still not a symlink<br>";
+        }
 
-//         return "Setup complete!";
-//     } catch (Exception $e) {
-//         return "❌Error: " . $e->getMessage();
-//     }
-// });
+        return "Setup complete!";
+    } catch (Exception $e) {
+        return "❌Error: " . $e->getMessage();
+    }
+});
 
-// Route::get('/fix-everything', function () {
-//     try {
-//         $qrDir = storage_path('app/public/qrs');
-//         if (!is_dir($qrDir)) {
-//             mkdir($qrDir, 0755, true);
-//             echo "✅ Created qrs directory<br>";
-//         }
-
-//         $publicStorage = public_path('storage');
-//         if (file_exists($publicStorage)) {
-//             if (is_link($publicStorage)) {
-//                 unlink($publicStorage);
-//                 echo "✅ Removed symlink<br>";
-//             } elseif (is_file($publicStorage)) {
-//                 unlink($publicStorage);
-//                 echo "✅ Removed file<br>";
-//             } elseif (is_dir($publicStorage)) {
-//                 function deleteDir($dirPath)
-//                 {
-//                     if (!is_dir($dirPath))
-//                         return false;
-//                     $files = array_diff(scandir($dirPath), array('.', '..'));
-//                     foreach ($files as $file) {
-//                         $path = $dirPath . '/' . $file;
-//                         is_dir($path) ? deleteDir($path) : unlink($path);
-//                     }
-//                     return rmdir($dirPath);
-//                 }
-//                 deleteDir($publicStorage);
-//                 echo "✅ Removed directory<br>";
-//             }
-//         }
-
-//         symlink(storage_path('app/public'), $publicStorage);
-//         echo "✅ Created new symlink<br>";
-
-//         $user = auth()->user();
-//         $qr = QrCode::format('svg')->size(300)->generate($user->token);
-//         $filePath = 'qrs/bar_' . $user->name . '.svg';
-//         Storage::disk('public')->put($filePath, $qr);
-//         $user->qr_path = $filePath;
-//         $user->save();
-//         echo "✅ QR regenerated<br>";
-
-//         return "🎉 Everything fixed!";
-
-//     } catch (Exception $e) {
-//         return "Error: " . $e->getMessage();
-//     }
-// });
