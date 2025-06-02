@@ -43,7 +43,6 @@ class RegisterController extends Controller
             $qrDir = storage_path('app/public/qrs');
             if (!is_dir($qrDir)) {
                 mkdir($qrDir, 0755, true);
-                error_log("Created qrs directory: " . $qrDir);
             }
 
             // Generar QR
@@ -56,14 +55,11 @@ class RegisterController extends Controller
             if ($result) {
                 $user->qr_path = $filePath;
                 $user->save();
-                error_log("QR saved successfully: " . $filePath);
-            } else {
-                error_log("Failed to save QR: " . $filePath);
             }
 
         } catch (Exception $e) {
-            error_log("QR generation error: " . $e->getMessage());
-            // Continuar sin QR si falla
+            // Log error but continue without QR
+            \Log::error('QR generation failed: ' . $e->getMessage());
         }
 
         return redirect()->route('login')->with('success', 'Account created successfully! Wait for the administrator to activate your account to access the dashboard.');
