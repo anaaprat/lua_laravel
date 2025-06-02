@@ -12,6 +12,7 @@ use App\Http\Controllers\Web\OrderController;
 use App\Http\Controllers\Web\StatisticsController;
 use App\Http\Controllers\Web\BarProductController;
 use App\Http\Controllers\Web\RechargeController;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 
 /*
@@ -120,4 +121,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/rankings/{id}/reset', [AdminController::class, 'resetRankingPoints'])->name('rankings.reset');
     Route::post('/rankings/reset-all', [AdminController::class, 'resetAllRankings'])->name('rankings.reset-all');
 
+});
+
+Route::get('/test-qr', function () {
+    try {
+        $qr = QrCode::format('svg')->size(300)->generate('test-token-123');
+        $filePath = 'qrs/test_qr.svg';
+        Storage::disk('public')->put($filePath, $qr);
+
+        echo "✅ QR generated successfully!<br>";
+        echo "File path: " . $filePath . "<br>";
+        echo "Full URL: " . asset('storage/' . $filePath) . "<br>";
+
+        return "Test complete";
+    } catch (Exception $e) {
+        return "❌ Error: " . $e->getMessage();
+    }
 });
