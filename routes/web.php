@@ -123,30 +123,22 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // Rutas railway 
-Route::get('/fix-auth', function () {
-    try {
-        $authPath = resource_path('views/auth');
-
-        // Verificar si podemos crear la carpeta
-        if (!is_dir($authPath)) {
-            mkdir($authPath, 0755, true);
-            echo "Created auth directory<br>";
-        }
-
-        // Listar contenido del directorio views
-        $viewsPath = resource_path('views');
-        $contents = scandir($viewsPath);
-        echo "Contents of views: " . implode(', ', $contents) . "<br>";
-
-        // Verificar si hay algún auth con diferente case
-        foreach ($contents as $item) {
-            if (strtolower($item) === 'auth') {
-                echo "Found auth folder with case: " . $item . "<br>";
-            }
-        }
-
-        return "Debug complete";
-    } catch (Exception $e) {
-        return "Error: " . $e->getMessage();
+Route::get('/check-folders', function() {
+    $viewsPath = resource_path('views');
+    
+    // Verificar Auth (mayúscula)
+    $authUpper = $viewsPath . '/Auth';
+    if (is_dir($authUpper)) {
+        $files = scandir($authUpper);
+        echo "Auth (uppercase) contains: " . implode(', ', $files) . "<br>";
     }
+    
+    // Verificar auth (minúscula)  
+    $authLower = $viewsPath . '/auth';
+    if (is_dir($authLower)) {
+        $files = scandir($authLower);
+        echo "auth (lowercase) contains: " . implode(', ', $files) . "<br>";
+    }
+    
+    return "Check complete";
 });
