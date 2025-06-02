@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -37,13 +38,34 @@ class RegisterController extends Controller
             'table_number' => $validated['table_number'],
         ]);
 
-        $qr = QrCode::format('svg')->size(300)->generate($token);
-        $filePath = 'qrs/bar_' . $user->name . '.svg';
-        Storage::disk('public')->put($filePath, $qr);
+        try {
+            // Crear directorio qrs si no existe
+            $qrDir = storage_path('app/public/qrs');
+            if (!is_dir($qrDir)) {
+                mkdir($qrDir, 0755, true);
+                error_log("Created qrs directory: " . $qrDir);
+            }
 
-        $user->qr_path = $filePath;
-        $user->save();
+            // Generar QR
+            $qr = QrCode::format('svg')->size(300)->generate($token);
+            $filePath = 'qrs/bar_' . $user->name . '.svg';
+
+            // Guardar QR
+            $result = Storage::disk('public')->put($filePath, $qr);
+
+            if ($result) {
+                $user->qr_path = $filePath;
+                $user->save();
+                error_log("QR saved successfully: " . $filePath);
+            } else {
+                error_log("Failed to save QR: " . $filePath);
+            }
+
+        } catch (Exception $e) {
+            error_log("QR generation error: " . $e->getMessage());
+            // Continuar sin QR si falla
+        }
 
         return redirect()->route('login')->with('success', 'Account created successfully! Wait for the administrator to activate your account to access the dashboard.');
     }
-}   
+}
