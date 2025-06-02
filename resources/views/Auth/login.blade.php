@@ -243,6 +243,7 @@
     </div>
 
     <script>
+        //Para doble click 
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('loginForm');
             const button = document.getElementById('loginButton');
