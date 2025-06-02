@@ -160,3 +160,24 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/rankings/reset-all', [AdminController::class, 'resetAllRankings'])->name('rankings.reset-all');
 
 });
+
+Route::get('/debug-symlink', function () {
+    $publicStorage = public_path('storage');
+    $storagePublic = storage_path('app/public');
+
+    echo "Public storage path: " . $publicStorage . "<br>";
+    echo "Storage public path: " . $storagePublic . "<br>";
+    echo "Public storage exists: " . (file_exists($publicStorage) ? 'YES' : 'NO') . "<br>";
+    echo "Is symlink: " . (is_link($publicStorage) ? 'YES' : 'NO') . "<br>";
+
+    if (is_link($publicStorage)) {
+        echo "Symlink target: " . readlink($publicStorage) . "<br>";
+        echo "Target exists: " . (file_exists(readlink($publicStorage)) ? 'YES' : 'NO') . "<br>";
+    }
+
+    // Verificar archivo específico
+    $qrFile = $storagePublic . '/qrs/bar_lua10.svg';
+    echo "QR file exists in storage: " . (file_exists($qrFile) ? 'YES' : 'NO') . "<br>";
+
+    return "";
+});
