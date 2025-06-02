@@ -65,9 +65,9 @@ Route::middleware(['auth', 'role:bar'])->group(function () {
     Route::delete('/bar-products/{barProduct}', [BarProductController::class, 'destroy'])->name('bar-products.destroy');
     Route::get('/bar/recharges-user', [RechargeController::class, 'rechargesUser'])->name('bar.rechargesUser');
     Route::post('/bar/add-credit', [RechargeController::class, 'addCredit'])->name('bar.addCredit');
-    Route::get('/bar/account', [App\Http\Controllers\web\BarAccountController::class, 'show'])->name('bar.account');
-    Route::post('/bar/account/update', [App\Http\Controllers\web\BarAccountController::class, 'update'])->name('bar.account.update');
-    Route::post('/bar/account/update-password', [App\Http\Controllers\web\BarAccountController::class, 'updatePassword'])->name('bar.account.updatePassword');
+    Route::get('/bar/account', [App\Http\Controllers\Web\BarAccountController::class, 'show'])->name('bar.account');
+    Route::post('/bar/account/update', [App\Http\Controllers\Web\BarAccountController::class, 'update'])->name('bar.account.update');
+    Route::post('/bar/account/update-password', [App\Http\Controllers\Web\BarAccountController::class, 'updatePassword'])->name('bar.account.updatePassword');
 
     Route::post('/orders/{order}/complete', [OrderController::class, 'markAsCompleted'])->name('orders.complete');
     Route::post('/orders/{order}/pending', [OrderController::class, 'markAsPending'])->name('orders.pending');
