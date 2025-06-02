@@ -22,8 +22,8 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
 
-        Artisan::call('config:clear');
-        Artisan::call('route:clear');
+        // Artisan::call('config:clear');
+        // Artisan::call('route:clear');
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',

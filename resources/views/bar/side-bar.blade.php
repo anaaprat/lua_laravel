@@ -30,33 +30,35 @@
     </div>
 
     <div class="bottom-section">
-        @if(session('debug'))
-            <div style="background: red; color: white; padding: 10px; font-size: 10px;">
-                {!! session('debug') !!}
+        @if(session('success'))
+            <div class="alert alert-success" style="font-size: 12px; margin-bottom: 10px;">
+                {{ session('success') }}
             </div>
         @endif
+
         @if(auth()->user()->qr_path)
             <div class="qr-container">
-                <!-- DEBUG: Mostrar info del QR -->
-                <p style="font-size:10px; color:white;">
-                    Path: {{ auth()->user()->qr_path }}<br>
-                    URL: {{ asset('storage/' . auth()->user()->qr_path) }}
+                <a href="{{ asset('storage/' . auth()->user()->qr_path) }}" download="qr_bar_{{ auth()->user()->id }}.svg">
+                    <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
+                </a>
+                <p style="color: white; font-size: 12px; text-align: center; margin-top: 8px;">
+                    Click on the QR to download it
                 </p>
 
-                <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
-
-                <!-- Botón de regenerar por si acaso -->
-                <form action="{{ route('regenerate-qr') }}" method="POST" style="margin-top:10px;">
+                <!-- Botón discreto de regenerar -->
+                <form action="{{ route('regenerate-qr') }}" method="POST" style="text-align: center; margin-top: 5px;">
                     @csrf
-                    <button type="submit" class="btn btn-sm btn-secondary">Regenerate QR</button>
+                    <button type="submit" class="btn btn-sm btn-outline-light" style="font-size: 10px;">
+                        🔄 Regenerate
+                    </button>
                 </form>
             </div>
         @else
             <div class="qr-container">
-                <p>QR not generated</p>
-                <form action="{{ route('regenerate-qr') }}" method="POST">
+                <p style="color: white; text-align: center;">QR not available</p>
+                <form action="{{ route('regenerate-qr') }}" method="POST" style="text-align: center;">
                     @csrf
-                    <button type="submit" class="btn btn-primary">Generate QR</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Generate QR</button>
                 </form>
             </div>
         @endif
