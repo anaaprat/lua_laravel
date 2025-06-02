@@ -138,3 +138,30 @@ Route::get('/test-qr', function () {
         return "❌ Error: " . $e->getMessage();
     }
 });
+
+Route::get('/debug-current-user', function () {
+    if (!auth()->check()) {
+        return "Not logged in - go to /login first";
+    }
+
+    $user = auth()->user();
+    echo "User ID: " . $user->id . "<br>";
+    echo "User name: " . $user->name . "<br>";
+    echo "QR Path: " . ($user->qr_path ?? 'NULL') . "<br>";
+
+    if ($user->qr_path) {
+        echo "Full URL: " . asset('storage/' . $user->qr_path) . "<br>";
+        echo "Storage URL: " . Storage::url($user->qr_path) . "<br>";
+
+        $fullPath = storage_path('app/public/' . $user->qr_path);
+        echo "Full system path: " . $fullPath . "<br>";
+        echo "File exists: " . (file_exists($fullPath) ? 'YES' : 'NO') . "<br>";
+
+        // Probar acceso directo
+        echo "<br><a href='" . asset('storage/' . $user->qr_path) . "' target='_blank'>Click to test QR URL</a><br>";
+    } else {
+        echo "No QR path in database<br>";
+    }
+
+    return "";
+});
