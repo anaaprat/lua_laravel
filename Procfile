@@ -1,1 +1,1 @@
-web: php artisan migrate --force && php artisan storage:link --force && php -S 0.0.0.0:$PORT -t public
+web: rm -rf public/storage && ln -sf /app/storage/app/public /app/public/storage && php -S 0.0.0.0:$PORT -t public
