@@ -218,3 +218,39 @@ Route::get('/railway-setup', function () {
     }
 });
 
+Route::get('/check-storage-now', function () {
+    $publicStorage = public_path('storage');
+    echo "Public storage exists: " . (file_exists($publicStorage) ? 'YES' : 'NO') . "<br>";
+    echo "Is symlink: " . (is_link($publicStorage) ? 'YES' : 'NO') . "<br>";
+
+    if (is_link($publicStorage)) {
+        $target = readlink($publicStorage);
+        echo "Symlink target: " . $target . "<br>";
+        echo "Target exists: " . (file_exists($target) ? 'YES' : 'NO') . "<br>";
+    }
+
+    return "";
+});
+
+Route::get('/emergency-storage-fix', function () {
+    try {
+        $publicStorage = public_path('storage');
+
+        // Eliminar lo que sea que esté ahí
+        if (file_exists($publicStorage)) {
+            if (is_link($publicStorage)) {
+                unlink($publicStorage);
+            } elseif (is_dir($publicStorage)) {
+                rmdir($publicStorage);
+            }
+        }
+
+        // Crear enlace fresh
+        symlink(storage_path('app/public'), $publicStorage);
+
+        return "✅ Fixed!";
+
+    } catch (Exception $e) {
+        return "Error: " . $e->getMessage();
+    }
+});
