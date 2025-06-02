@@ -232,14 +232,12 @@
             <div class="form-group">
                 <label for="table_number">Number of tables</label>
 
-                <!-- Counter con botones + - -->
                 <div class="table-counter">
                     <button type="button" class="counter-btn" id="decreaseBtn" onclick="changeTableCount(-1)">-</button>
                     <div class="counter-display" id="tableDisplay">{{ old('table_number', 1) }}</div>
                     <button type="button" class="counter-btn" id="increaseBtn" onclick="changeTableCount(1)">+</button>
                 </div>
 
-                <!-- Input oculto para enviar el valor -->
                 <input type="hidden" name="table_number" id="tableNumberInput" value="{{ old('table_number', 1) }}">
 
                 <small style="color: rgba(255, 255, 255, 0.6); font-size: 0.8rem;">
@@ -272,12 +270,10 @@
             document.getElementById('tableDisplay').textContent = tableCount;
             document.getElementById('tableNumberInput').value = tableCount;
 
-            // Deshabilitar botones si llegamos a los límites
             document.getElementById('decreaseBtn').disabled = tableCount <= minTables;
             document.getElementById('increaseBtn').disabled = tableCount >= maxTables;
         }
 
-        // Inicializar el display al cargar la página
         document.addEventListener('DOMContentLoaded', function () {
             updateDisplay();
         });

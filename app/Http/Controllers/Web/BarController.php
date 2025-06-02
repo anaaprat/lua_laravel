@@ -40,7 +40,6 @@ class BarController extends Controller
         $pendingOrders = $orders->where('status', 'pending')->sortBy('created_at');
         $completedOrders = $orders->where('status', 'completed')->sortByDesc('updated_at');
 
-        // Renderizar las vistas parciales
         $pendingOrdersHtml = view('bar.partials.pending-orders', compact('pendingOrders'))->render();
         $completedOrdersHtml = view('bar.partials.completed-orders', compact('completedOrders'))->render();
 

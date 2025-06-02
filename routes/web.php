@@ -62,10 +62,8 @@ Route::middleware(['auth', 'role:bar'])->group(function () {
 
 // Rutas ADMIN
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Dashboard
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
 
-    // Gestión de Usuarios
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
@@ -74,7 +72,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
     Route::patch('/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('users.toggle-status');
 
-    // Gestión de Bares
     Route::get('/bars', [AdminController::class, 'bars'])->name('bars');
     Route::get('/bars/create', [AdminController::class, 'createBar'])->name('bars.create');
     Route::post('/bars', [AdminController::class, 'storeBar'])->name('bars.store');
@@ -83,7 +80,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/bars/{id}', [AdminController::class, 'deleteBar'])->name('bars.delete');
     Route::patch('/bars/{id}/toggle-status', [AdminController::class, 'toggleBarStatus'])->name('bars.toggle-status');
 
-    // Gestión de Productos
     Route::get('/products', [AdminController::class, 'products'])->name('products');
     Route::get('/products/create', [AdminController::class, 'createProduct'])->name('products.create');
     Route::post('/products', [AdminController::class, 'storeProduct'])->name('products.store');
@@ -91,13 +87,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/products/{id}', [AdminController::class, 'updateProduct'])->name('products.update');
     Route::delete('/products/{id}', [AdminController::class, 'deleteProduct'])->name('products.delete');
 
-    // Visualización de Movimientos
     Route::get('/movements', [AdminController::class, 'movements'])->name('movements');
 
-    // Visualización de Pedidos
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
 
-    // Gestión de Rankings
     Route::get('/rankings', [AdminController::class, 'rankings'])->name('rankings');
     Route::get('/rankings/create', [AdminController::class, 'createRanking'])->name('rankings.create');
     Route::post('/rankings', [AdminController::class, 'storeRanking'])->name('rankings.store');

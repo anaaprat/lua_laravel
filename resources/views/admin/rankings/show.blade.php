@@ -223,7 +223,6 @@
 <script>
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(function() {
-            // Crear una notificación temporal
             const toast = document.createElement('div');
             toast.className = 'alert alert-success position-fixed';
             toast.style.top = '20px';

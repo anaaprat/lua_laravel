@@ -15,13 +15,11 @@ class Movement extends Model
         'amount',
     ];
 
-    // Relación con el usuario que recarga
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Relación con el bar donde se recarga
     public function bar()
     {
         return $this->belongsTo(User::class, 'bar_id');

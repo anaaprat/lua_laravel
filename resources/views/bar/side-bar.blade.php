@@ -42,13 +42,11 @@
             </div>
         @endif
 
-        <!-- Botón de logout con confirmación -->
         <a href="#" class="logout-link" onclick="return confirmLogout()">
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>
         </a>
 
-        <!-- Formulario oculto para logout -->
         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
             @csrf
         </form>

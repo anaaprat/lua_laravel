@@ -238,7 +238,6 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <!-- Botón de logout con confirmación -->
                     <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#logoutModal">
                         <i class="fas fa-sign-out-alt"></i>
                         Cerrar Sesión
@@ -258,7 +257,6 @@
             </div>
         </div>
 
-        <!-- Alerts -->
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle me-2"></i>
@@ -298,7 +296,6 @@
         @yield('content')
     </div>
 
-    <!-- Modal de confirmación de logout -->
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">

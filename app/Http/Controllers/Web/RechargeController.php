@@ -18,14 +18,11 @@ class RechargeController extends Controller
      */
     public function index(Request $request)
     {
-        // Get authenticated bar
         $bar = Auth::user();
 
-        // Build query to get movements (recharges) for the current bar
         $movementsQuery = Movement::where('bar_id', $bar->id)
-            ->with('user'); // Eager load user data
+            ->with('user');
 
-        // Apply date filters if provided
         if ($request->filled('from')) {
             $movementsQuery->whereDate('created_at', '>=', $request->from);
         }
@@ -34,15 +31,12 @@ class RechargeController extends Controller
             $movementsQuery->whereDate('created_at', '<=', $request->to);
         }
 
-        // Get movements ordered by most recent first
         $movements = $movementsQuery->orderBy('created_at', 'desc')->get();
 
-        // Calculate total recharge amount
         $totalAmount = $movements->sum('amount');
 
-        // Calculate positive (deposits) and negative (withdrawals) totals
         $deposits = $movements->where('amount', '>', 0)->sum('amount');
-        $withdrawals = $movements->where('amount', '<', 0)->sum('amount') * -1; // Make positive for display
+        $withdrawals = $movements->where('amount', '<', 0)->sum('amount') * -1; 
 
         return view('bar.recharges', compact('movements', 'totalAmount', 'deposits', 'withdrawals'));
     }
@@ -73,7 +67,7 @@ class RechargeController extends Controller
             ->where('amount', '>', 0)
             ->with('user')
             ->orderBy('created_at', 'desc')
-            ->take(10) // Limit to 10 most recent
+            ->take(10) 
             ->get();
 
         return view('bar.rechargesUser', compact('user', 'recentRecharges'));
@@ -96,15 +90,12 @@ class RechargeController extends Controller
         $userId = $request->input('user_id');
         $amount = $request->input('amount');
 
-        // Find the user
         $user = User::findOrFail($userId);
 
-        // Verify user is active and not deleted
         if (!$user->is_active || $user->deleted) {
             return redirect()->back()->with('error', 'No se puede añadir crédito a este usuario.');
         }
 
-        // Verify user has role 'user'
         if ($user->role !== 'user') {
             return redirect()->back()->with('error', 'Solo se puede añadir crédito a usuarios.');
         }
@@ -112,14 +103,12 @@ class RechargeController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create a movement record
             Movement::create([
                 'user_id' => $userId,
                 'bar_id' => $barId,
                 'amount' => $amount,
             ]);
 
-            // Update user's credit
             $user->credit += $amount;
             $user->save();
 

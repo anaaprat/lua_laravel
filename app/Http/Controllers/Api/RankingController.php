@@ -13,10 +13,6 @@ use Illuminate\Support\Str;
 
 class RankingController extends Controller
 {
-    // Implementar un sistema de ranking entre amigos
-    // Primero, necesitamos crear una tabla 'rankings' y 'ranking_users' si no existe
-    
-    // Crear un nuevo ranking
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -29,17 +25,14 @@ class RankingController extends Controller
         
         $user = $request->user();
         
-        // Generar código único
         $code = strtoupper(Str::random(6));
         
-        // Crear el ranking
         $ranking = Ranking::create([
             'name' => $request->name,
             'code' => $code,
             'creator_id' => $user->id,
         ]);
         
-        // Añadir al creador como miembro
         $ranking->users()->attach($user->id, ['points' => 0, 'month_record' => 0]);
         
         return response()->json([
@@ -48,7 +41,6 @@ class RankingController extends Controller
         ], 201);
     }
     
-    // Unirse a un ranking con código
     public function join(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -62,7 +54,6 @@ class RankingController extends Controller
         $user = $request->user();
         $ranking = Ranking::where('code', $request->code)->first();
         
-        // Verificar si ya es miembro
         $isMember = $ranking->users()->where('user_id', $user->id)->exists();
         
         if ($isMember) {
@@ -71,7 +62,6 @@ class RankingController extends Controller
             ], 422);
         }
         
-        // Añadir al usuario como miembro
         $ranking->users()->attach($user->id, ['points' => 0, 'month_record' => 0]);
         
         return response()->json([
@@ -80,7 +70,6 @@ class RankingController extends Controller
         ]);
     }
     
-    // Obtener mis rankings
     public function myRankings(Request $request)
     {
         $user = $request->user();
@@ -95,7 +84,6 @@ class RankingController extends Controller
         ]);
     }
     
-    // Ver un ranking específico
     public function show(Request $request, $rankingId)
     {
         $user = $request->user();
@@ -105,7 +93,6 @@ class RankingController extends Controller
                  ->orderBy('ranking_users.points', 'desc');
         }])->findOrFail($rankingId);
         
-        // Verificar si el usuario es miembro
         $isMember = $ranking->users()->where('user_id', $user->id)->exists();
         
         if (!$isMember) {
@@ -119,15 +106,12 @@ class RankingController extends Controller
         ]);
     }
     
-    // Función para actualizar rankings mensualmente (programar con cron)
     public function resetMonthly()
     {
-        // Guardar récords mensuales
         DB::table('ranking_users')
           ->where('points', '>', DB::raw('month_record'))
           ->update(['month_record' => DB::raw('points')]);
           
-        // Reiniciar puntos
         DB::table('ranking_users')->update(['points' => 0]);
         
         return response()->json([

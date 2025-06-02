@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-    // Actualizar perfil de usuario
     public function update(Request $request)
     {
         $user = $request->user();
@@ -27,7 +26,6 @@ class UserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
         
-        // Verificar contraseña actual si se quiere cambiar
         if ($request->has('password')) {
             if (!Hash::check($request->current_password, $user->password)) {
                 return response()->json([
@@ -36,7 +34,6 @@ class UserController extends Controller
             }
         }
         
-        // Actualizar datos
         if ($request->has('name')) {
             $user->name = $request->name;
         }
@@ -57,7 +54,6 @@ class UserController extends Controller
         ]);
     }
 
-    // Obtener historial de movimientos de saldo
     public function creditHistory(Request $request)
     {
         $user = $request->user();

@@ -12,18 +12,12 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class BarAccountController extends Controller
 {
-    /**
-     * Mostrar la página de cuenta del bar
-     */
     public function show()
     {
         $bar = Auth::user();
         return view('bar.account', compact('bar'));
     }
 
-    /**
-     * Actualizar la información del bar
-     */
     public function update(Request $request)
     {
         $bar = Auth::user();
@@ -38,18 +32,14 @@ class BarAccountController extends Controller
         $bar->email = $validated['email'];
         $bar->table_number = $validated['table_number'];
         
-        // Si el nombre cambió, regenerar el código QR
         if ($bar->isDirty('name')) {
-            // Generar nuevo QR con el token existente
             $qr = QrCode::format('svg')->size(300)->generate($bar->token);
             $filePath = 'qrs/bar_' . $validated['name'] . '.svg';
             
-            // Eliminar el anterior si existe
             if ($bar->qr_path) {
                 Storage::disk('public')->delete($bar->qr_path);
             }
             
-            // Guardar el nuevo
             Storage::disk('public')->put($filePath, $qr);
             $bar->qr_path = $filePath;
         }
@@ -59,9 +49,6 @@ class BarAccountController extends Controller
         return redirect()->route('bar.account')->with('success', 'Información actualizada correctamente');
     }
 
-    /**
-     * Actualizar la contraseña del bar
-     */
     public function updatePassword(Request $request)
     {
         $validated = $request->validate([
@@ -71,12 +58,10 @@ class BarAccountController extends Controller
         
         $bar = Auth::user();
         
-        // Verificar contraseña actual
         if (!Hash::check($validated['current_password'], $bar->password)) {
             return back()->withErrors(['current_password' => 'La contraseña actual no es correcta']);
         }
         
-        // Actualizar contraseña
         $bar->password = Hash::make($validated['password']);
         $bar->save();
         

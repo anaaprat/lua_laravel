@@ -15,7 +15,6 @@ class Ranking extends Model
         'creator_id',
     ];
 
-    // Relaciones
     public function creator()
     {
         return $this->belongsTo(User::class, 'creator_id');

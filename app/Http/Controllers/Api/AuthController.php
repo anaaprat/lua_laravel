@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    // Método para registrar usuarios
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -43,7 +42,6 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // Método para iniciar sesión
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -63,7 +61,6 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->firstOrFail();
         
-        // Verificar si el usuario está activo
         if (!$user->is_active || $user->deleted) {
             return response()->json([
                 'message' => 'Usuario no activo o eliminado',
@@ -79,7 +76,6 @@ class AuthController extends Controller
         ]);
     }
 
-    // Método para cerrar sesión
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -89,7 +85,6 @@ class AuthController extends Controller
         ]);
     }
 
-    // Obtener el usuario actual
     public function me(Request $request)
     {
         return response()->json([

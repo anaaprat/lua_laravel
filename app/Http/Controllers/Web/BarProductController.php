@@ -44,7 +44,6 @@ class BarProductController extends Controller
         Log::info('Usuario autenticado:', ['user_id' => Auth::id(), 'user_name' => Auth::user()->name]);
         Log::info('Datos recibidos:', $request->all());
 
-        // Validación condicional
         $rules = [
             'product_option' => 'required|string',
             'price' => 'required|numeric|min:0',
@@ -52,7 +51,6 @@ class BarProductController extends Controller
             'available' => 'required|in:0,1',
         ];
 
-        // Si es un producto nuevo, añadir validaciones adicionales
         if ($request->product_option === 'new') {
             $rules['product_name'] = 'required|string|max:255';
             $rules['type'] = 'required|string|in:food,drink,other';
@@ -73,7 +71,6 @@ class BarProductController extends Controller
             if ($request->product_option === 'new') {
                 Log::info('Creando nuevo producto');
 
-                // Verificar si ya existe
                 $existing = Product::where('name', $request->product_name)->first();
                 if ($existing) {
                     Log::warning('Producto ya existe:', ['existing_product' => $existing->toArray()]);
@@ -83,7 +80,6 @@ class BarProductController extends Controller
                         ->withInput();
                 }
 
-                // Crear nuevo producto
                 $product = Product::create([
                     'name' => $request->product_name,
                     'description' => $request->description,
@@ -98,7 +94,6 @@ class BarProductController extends Controller
                 $product = Product::findOrFail($request->product_option);
                 Log::info('Producto encontrado:', $product->toArray());
 
-                // Verificar si el bar ya tiene este producto
                 $existingBarProduct = BarProduct::where('user_id', Auth::id())
                     ->where('product_id', $product->id)
                     ->first();
@@ -112,7 +107,6 @@ class BarProductController extends Controller
                 }
             }
 
-            // Crear la relación BarProduct
             Log::info('Creando BarProduct con:', [
                 'user_id' => Auth::id(),
                 'product_id' => $product->id,
@@ -131,7 +125,6 @@ class BarProductController extends Controller
 
             Log::info('BarProduct creado:', $barProduct->toArray());
 
-            // Verificar que se guardó correctamente
             $saved = BarProduct::find($barProduct->id);
             Log::info('BarProduct verificado en BD:', $saved ? $saved->toArray() : 'NO ENCONTRADO');
 

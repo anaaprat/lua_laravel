@@ -29,21 +29,18 @@ class LoginController extends Controller
                 'deleted' => $user->deleted
             ]);
 
-            // 1. Verificar si el usuario tiene rol 'user'
             if ($user->role === 'user') {
                 Auth::logout();
                 Log::info('Acceso denegado: usuario con rol cliente', ['user_id' => $user->id]);
                 return back()->with('error', 'Esta plataforma web es solo para administradores y bares. Los clientes deben usar la aplicación móvil.');
             }
 
-            // 2. Verificar si el usuario está eliminado
             if ($user->deleted) {
                 Auth::logout();
                 Log::warning('Acceso denegado: usuario eliminado', ['user_id' => $user->id]);
                 return back()->with('error', 'Tu cuenta ha sido eliminada. Contacta con el administrador si crees que es un error.');
             }
 
-            // 3. Verificar si el usuario está inactivo
             if (!$user->is_active) {
                 Auth::logout();
                 Log::warning('Acceso denegado: usuario inactivo', ['user_id' => $user->id]);
@@ -57,7 +54,6 @@ class LoginController extends Controller
                 return back()->with('error', $message);
             }
 
-            // 4. Si todo está bien, regenerar sesión y redirigir
             $request->session()->regenerate();
 
             Log::info('Login exitoso', [
@@ -66,7 +62,6 @@ class LoginController extends Controller
                 'redirect_to' => $user->role === 'admin' ? '/admin' : '/bar'
             ]);
 
-            // Redirigir según el rol (solo admin y bar activos)
             return match ($user->role) {
                 'admin' => redirect()->intended('/admin')->with('success', "Bienvenido, {$user->name}"),
                 'bar' => redirect()->intended('/bar')->with('success', "Bienvenido al panel de {$user->name}"),
@@ -74,7 +69,6 @@ class LoginController extends Controller
             };
         }
 
-        // Credenciales incorrectas
         Log::warning('Intento de login fallido', [
             'email' => $request->email,
             'ip' => $request->ip()

@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    // Obtener detalles de un producto específico de un bar
     public function show($barId, $productId)
     {
         $barProduct = BarProduct::with('product')
@@ -42,7 +41,6 @@ class ProductController extends Controller
         ]);
     }
 
-    // Buscar productos por nombre o descripción
     public function search(Request $request, $barId)
     {
         $query = $request->input('query');

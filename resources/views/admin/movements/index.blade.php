@@ -4,7 +4,6 @@
 @section('page-title', 'Visualización de Movimientos')
 
 @section('content')
-    <!-- Estadísticas -->
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card border-0" style="background: linear-gradient(135deg, #007bff, #0056b3);">
@@ -74,7 +73,6 @@
         </div>
     </div>
 
-    <!-- Tabla de Movimientos -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
@@ -163,12 +161,10 @@
                 </table>
             </div>
 
-            <!-- Paginación mejorada -->
             @if($movements->hasPages())
                 <div class="d-flex justify-content-center mt-4">
                     <nav aria-label="Navegación de páginas">
                         <ul class="pagination pagination-sm">
-                            {{-- Enlace anterior --}}
                             @if ($movements->onFirstPage())
                                 <li class="page-item disabled">
                                     <span class="page-link">
@@ -184,7 +180,6 @@
                                 </li>
                             @endif
 
-                            {{-- Enlaces de páginas --}}
                             @foreach ($movements->appends(request()->query())->getUrlRange(1, $movements->lastPage()) as $page => $url)
                                 @if ($page == $movements->currentPage())
                                     <li class="page-item active">
@@ -197,7 +192,6 @@
                                 @endif
                             @endforeach
 
-                            {{-- Enlace siguiente --}}
                             @if ($movements->hasMorePages())
                                 <li class="page-item">
                                     <a class="page-link" href="{{ $movements->appends(request()->query())->nextPageUrl() }}"
@@ -237,7 +231,6 @@
             font-weight: 600;
         }
 
-        /* Estilos personalizados para la paginación */
         .pagination {
             margin-bottom: 0;
         }

@@ -14,7 +14,6 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <!-- IMPORTANTE: Añadir enctype para subida de archivos -->
                     <form action="{{ route('admin.products.update', $product->id) }}" method="POST"
                         enctype="multipart/form-data">
                         @csrf
@@ -77,7 +76,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Campo oculto para productos que no son bebidas -->
                                 <input type="hidden" id="is_drink_hidden" name="is_drink" value="0" style="display: none;">
                             </div>
                         </div>
@@ -100,11 +98,9 @@
                             @enderror
                         </div>
 
-                        <!-- Sección para imagen -->
                         <div class="mb-3">
                             <label class="form-label">Imagen del Producto</label>
 
-                            <!-- Imagen actual si existe -->
                             @if($product->image_url)
                                 <div class="mb-3">
                                     <div class="card">
@@ -120,7 +116,6 @@
                                 </div>
                             @endif
 
-                            <!-- Opciones de imagen -->
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="card">
@@ -159,7 +154,6 @@
                                 </div>
                             </div>
 
-                            <!-- Vista previa de nueva imagen -->
                             <div id="image-preview" class="mt-3" style="display: none;">
                                 <div class="card">
                                     <div class="card-body text-center">
@@ -177,7 +171,6 @@
                             </div>
                         </div>
 
-                        <!-- Información de uso del producto -->
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="mb-3">
@@ -258,18 +251,15 @@
             const isDrinkHidden = document.getElementById('is_drink_hidden');
 
             if (typeSelect.value === 'drink') {
-                // Mostrar campo de alcohol solo para bebidas
                 alcoholField.style.display = 'block';
                 isDrinkSelect.setAttribute('required', 'required');
                 isDrinkHidden.style.display = 'none';
                 isDrinkHidden.disabled = true;
             } else {
-                // Ocultar campo de alcohol para comida y otros
                 alcoholField.style.display = 'none';
                 isDrinkSelect.removeAttribute('required');
                 isDrinkSelect.value = '';
 
-                // Para comida/otros, siempre is_drink = 0
                 isDrinkHidden.style.display = 'block';
                 isDrinkHidden.disabled = false;
                 isDrinkHidden.value = '0';
@@ -287,36 +277,29 @@
             const type = typeSelect.value;
             const isAlcoholic = isDrinkSelect.value;
 
-            // Mostrar información del ranking
             rankingInfo.style.display = 'block';
 
             if (type === 'drink' && isAlcoholic === '1') {
-                // Bebida alcohólica - SÍ cuenta para ranking
                 rankingText.innerHTML = '🍷 <strong>Esta bebida alcohólica SÍ contará para el ranking entre amigos</strong>';
                 rankingInfo.className = 'alert alert-success';
 
             } else if (type === 'drink' && isAlcoholic === '0') {
-                // Bebida sin alcohol - NO cuenta para ranking
                 rankingText.innerHTML = '💧 Esta bebida sin alcohol NO contará para el ranking';
                 rankingInfo.className = 'alert alert-warning';
 
             } else if (type === 'drink' && isAlcoholic === '') {
-                // Bebida pero sin especificar alcohol
                 rankingText.innerHTML = '🍺 Especifica si la bebida es alcohólica para determinar si cuenta para el ranking';
                 rankingInfo.className = 'alert alert-info';
 
             } else if (type === 'food') {
-                // Comida - NO cuenta para ranking
                 rankingText.innerHTML = '🍽️ La comida NO cuenta para el ranking';
                 rankingInfo.className = 'alert alert-secondary';
 
             } else if (type === 'other') {
-                // Otros - NO cuenta para ranking
                 rankingText.innerHTML = '🔧 Este tipo de producto NO cuenta para el ranking';
                 rankingInfo.className = 'alert alert-secondary';
 
             } else {
-                // Sin seleccionar tipo
                 rankingText.innerHTML = 'Selecciona el tipo de producto para ver información del ranking';
                 rankingInfo.className = 'alert alert-info';
             }
@@ -333,7 +316,6 @@
                     previewImg.src = e.target.result;
                     preview.style.display = 'block';
 
-                    // Limpiar URL si se sube archivo
                     document.getElementById('image_url').value = '';
                 }
 
@@ -347,7 +329,6 @@
             document.getElementById('preview-img').src = '';
         }
 
-        // Limpiar archivo si se introduce URL
         document.getElementById('image_url').addEventListener('input', function () {
             if (this.value) {
                 document.getElementById('image_file').value = '';
@@ -355,7 +336,6 @@
             }
         });
 
-        // Inicializar el estado al cargar la página
         document.addEventListener('DOMContentLoaded', function () {
             updateAlcoholField();
         });

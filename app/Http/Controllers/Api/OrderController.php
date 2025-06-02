@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    // Crear un nuevo pedido
     public function store(Request $request)
     {
         $user = $request->user();
@@ -48,7 +47,6 @@ class OrderController extends Controller
         $items = $request->items;
         $tableNumber = $request->table_number;
 
-        // Validar que el bar existe y está activo
         $bar = User::where('id', $barId)
             ->where('role', 'bar')
             ->where('is_active', true)
@@ -68,7 +66,6 @@ class OrderController extends Controller
             'table_number' => $bar->table_number
         ]);
 
-        // Validar que el número de mesa no excede las disponibles en el bar
         if ($bar->table_number && $tableNumber > $bar->table_number) {
             \Log::error('Número de mesa no válido:', [
                 'requested_table' => $tableNumber,
@@ -79,7 +76,6 @@ class OrderController extends Controller
             ], 422);
         }
 
-        // Calcular el total del pedido y validar disponibilidad de productos
         $total = 0;
         $orderItems = [];
 
@@ -106,7 +102,6 @@ class OrderController extends Controller
                     'requested_quantity' => $item['quantity']
                 ]);
 
-                // Verificar stock
                 if ($barProduct->stock < $item['quantity']) {
                     throw new \Exception("Stock insuficiente para el producto: {$barProduct->product->name}");
                 }
@@ -120,8 +115,7 @@ class OrderController extends Controller
                     'subtotal' => $subtotal
                 ];
 
-                // Reducir stock
-                $barProduct->stock -= $item['quantity'];
++                $barProduct->stock -= $item['quantity'];
                 $barProduct->save();
 
                 \Log::info('Stock actualizado:', [
@@ -132,12 +126,10 @@ class OrderController extends Controller
 
             \Log::info('Total calculado:', ['total' => $total, 'user_credit' => $user->credit]);
 
-            // Verificar saldo suficiente
             if ($user->credit < $total) {
                 throw new \Exception("Saldo insuficiente. Necesitas {$total} €, pero solo tienes {$user->credit} €");
             }
 
-            // Crear el pedido
             $orderData = [
                 'user_id' => $user->id,
                 'bar_id' => $barId,
@@ -145,7 +137,6 @@ class OrderController extends Controller
                 'status' => 'pending',
             ];
 
-            // Solo agregar table_number si existe la columna
             try {
                 $orderData['table_number'] = $tableNumber;
                 $order = Order::create($orderData);
@@ -161,25 +152,21 @@ class OrderController extends Controller
 
             \Log::info('Pedido creado:', ['order_id' => $order->id]);
 
-            // Crear los items del pedido
             foreach ($orderItems as $item) {
                 $order->items()->create($item);
             }
 
-            // Registrar el movimiento (pago)
             Movement::create([
                 'user_id' => $user->id,
                 'bar_id' => $barId,
-                'amount' => -$total // Monto negativo porque es un pago
+                'amount' => -$total 
             ]);
 
-            // Actualizar el saldo del usuario
             $user->credit -= $total;
             $user->save();
 
             \Log::info('Saldo actualizado:', ['new_credit' => $user->credit]);
 
-            // Actualizar rankings si existe el modelo
             if (class_exists('App\Models\Ranking')) {
                 foreach ($orderItems as $item) {
                     $product = \App\Models\Product::find($item['product_id']);
@@ -200,7 +187,6 @@ class OrderController extends Controller
 
             DB::commit();
 
-            // Cargar los detalles completos del pedido
             $order = Order::with(['bar:id,name', 'items.product'])
                 ->find($order->id);
 
@@ -226,7 +212,6 @@ class OrderController extends Controller
         }
     }
 
-    // Obtener el historial de pedidos del usuario
     public function history(Request $request)
     {
         $user = $request->user();
@@ -241,7 +226,6 @@ class OrderController extends Controller
         ]);
     }
 
-    // Obtener detalles de un pedido específico
     public function show(Request $request, $orderId)
     {
         $user = $request->user();

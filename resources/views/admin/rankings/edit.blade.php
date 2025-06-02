@@ -126,7 +126,6 @@
                                     </div>
                                 @endforeach
                                 
-                                <!-- Input oculto para mantener al creador siempre seleccionado -->
                                 <input type="hidden" name="users[]" value="{{ $ranking->creator_id }}">
                             </div>
                             <div class="form-text">

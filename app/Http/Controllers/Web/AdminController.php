@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
-    // Dashboard principal
     public function dashboard()
     {
         $stats = [
@@ -141,7 +140,6 @@ class AdminController extends Controller
                 $order->update(['status' => 'canceled']);
             }
 
-            // 2. ELIMINAR DEL RANKING
             if (class_exists('App\Models\Ranking')) {
                 $rankingsCount = DB::table('ranking_users')->where('user_id', $id)->count();
                 DB::table('ranking_users')->where('user_id', $id)->delete();
@@ -258,7 +256,6 @@ class AdminController extends Controller
         return redirect()->route('admin.bars')->with('success', 'Bar actualizado correctamente');
     }
 
-    // En AdminController.php
     public function deleteBar($id)
     {
         $bar = User::where('role', 'bar')->findOrFail($id);
@@ -271,7 +268,6 @@ class AdminController extends Controller
             foreach ($pendingOrders as $order) {
                 Log::info('Cancelando pedido pendiente', ['order_id' => $order->id]);
 
-                // Restaurar stock de productos
                 foreach ($order->items as $item) {
                     $barProduct = BarProduct::where('user_id', $id)
                         ->where('product_id', $item->product_id)
@@ -288,12 +284,10 @@ class AdminController extends Controller
                     }
                 }
 
-                // Reembolsar al usuario
                 if ($order->user && !$order->user->deleted) {
                     $order->user->credit += $order->total;
                     $order->user->save();
 
-                    // Crear movimiento de reembolso
                     Movement::create([
                         'user_id' => $order->user_id,
                         'bar_id' => $id,
@@ -308,36 +302,31 @@ class AdminController extends Controller
                     ]);
                 }
 
-                // Revertir puntos de ranking si había bebidas
                 $this->revertRankingPointsForOrder($order);
             }
 
-            // Eliminar todos los pedidos del bar (pendientes, completados, cancelados)
             $totalOrders = Order::where('bar_id', $id)->count();
             Order::where('bar_id', $id)->delete();
             Log::info('Pedidos eliminados', ['total_orders_deleted' => $totalOrders]);
 
-            // 2. ELIMINAR RELACIONES BAR-PRODUCTOS
             $totalBarProducts = BarProduct::where('user_id', $id)->count();
             BarProduct::where('user_id', $id)->delete();
             Log::info('Productos del bar eliminados', ['total_bar_products_deleted' => $totalBarProducts]);
 
-            // 3. ELIMINAR MOVIMIENTOS RELACIONADOS
             $totalMovements = Movement::where('bar_id', $id)->count();
             Movement::where('bar_id', $id)->delete();
             Log::info('Movimientos eliminados', ['total_movements_deleted' => $totalMovements]);
 
-            // 4. ELIMINAR ARCHIVO QR SI EXISTE
+            //Borrar el QR 
             if ($bar->qr_path && Storage::disk('public')->exists($bar->qr_path)) {
                 Storage::disk('public')->delete($bar->qr_path);
                 Log::info('Código QR eliminado', ['qr_path' => $bar->qr_path]);
             }
 
-            // 5. MARCAR BAR COMO ELIMINADO
             $bar->update([
                 'deleted' => true,
                 'is_active' => false,
-                'token' => null, // Invalidar token para evitar accesos
+                'token' => null, 
                 'qr_path' => null
             ]);
 
@@ -371,9 +360,6 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Revertir puntos de ranking para un pedido
-     */
     private function revertRankingPointsForOrder($order)
     {
         if (!class_exists('App\Models\Ranking')) {
@@ -442,7 +428,7 @@ class AdminController extends Controller
             'type' => 'required|string|max:255',
             'is_drink' => 'required|boolean',
             'image_url' => 'nullable|url|max:500',
-            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // 2MB máximo
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', 
         ]);
 
         Log::info('Datos validados:', $validated);
@@ -450,7 +436,6 @@ class AdminController extends Controller
         $imageUrl = null;
 
         try {
-            // Priorizar archivo subido sobre URL
             if ($request->hasFile('image_file')) {
                 Log::info('Procesando archivo de imagen...');
 
@@ -461,30 +446,24 @@ class AdminController extends Controller
                     'mime' => $image->getMimeType(),
                 ]);
 
-                // Generar nombre único para evitar conflictos
                 $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
 
-                // Crear directorio si no existe
                 if (!Storage::disk('public')->exists('products')) {
                     Storage::disk('public')->makeDirectory('products');
                     Log::info('Directorio products creado');
                 }
 
-                // Guardar en storage/app/public/products
                 $imagePath = $image->storeAs('products', $imageName, 'public');
                 Log::info('Imagen guardada en:' . $imagePath);
 
-                // URL completa para acceder a la imagen
                 $imageUrl = asset('storage/' . $imagePath);
                 Log::info('URL de imagen generada:' . $imageUrl);
 
             } elseif (!empty($validated['image_url'])) {
-                // Si no hay archivo, usar URL proporcionada
                 $imageUrl = $validated['image_url'];
                 Log::info('Usando URL proporcionada:', $imageUrl);
             }
 
-            // Crear el producto
             $product = Product::create([
                 'name' => $validated['name'],
                 'description' => $validated['description'],
@@ -535,13 +514,11 @@ class AdminController extends Controller
         ]);
 
         try {
-            $imageUrl = $product->image_url; // Mantener imagen actual por defecto
+            $imageUrl = $product->image_url;
 
-            // Procesar nueva imagen si se proporciona
             if ($request->hasFile('image_file')) {
                 Log::info('Procesando nueva imagen...');
 
-                // Eliminar imagen anterior si existe y es de nuestro storage
                 if ($product->image_url && str_contains($product->image_url, 'storage/products/')) {
                     $oldImagePath = str_replace(asset('storage/'), '', $product->image_url);
                     if (Storage::disk('public')->exists($oldImagePath)) {
@@ -558,9 +535,7 @@ class AdminController extends Controller
                 Log::info('Nueva imagen guardada:' . $imageUrl);
 
             } elseif (!empty($validated['image_url']) && $validated['image_url'] !== $product->image_url) {
-                // Si se proporciona nueva URL y es diferente a la actual
 
-                // Eliminar imagen anterior si era de nuestro storage
                 if ($product->image_url && str_contains($product->image_url, 'storage/products/')) {
                     $oldImagePath = str_replace(asset('storage/'), '', $product->image_url);
                     if (Storage::disk('public')->exists($oldImagePath)) {
@@ -573,7 +548,6 @@ class AdminController extends Controller
                 Log::info('Usando nueva URL:', $imageUrl);
             }
 
-            // Actualizar producto
             $product->update([
                 'name' => $validated['name'],
                 'description' => $validated['description'],
@@ -603,7 +577,6 @@ class AdminController extends Controller
     {
         $product = Product::findOrFail($id);
 
-        // Verificar si el producto está siendo usado en algún bar
         $barProductsCount = BarProduct::where('product_id', $id)->count();
 
         if ($barProductsCount > 0) {
@@ -612,7 +585,6 @@ class AdminController extends Controller
         }
 
         try {
-            // Eliminar imagen si existe y es de nuestro storage
             if ($product->image_url && str_contains($product->image_url, 'storage/products/')) {
                 $imagePath = str_replace(asset('storage/'), '', $product->image_url);
                 if (Storage::disk('public')->exists($imagePath)) {
@@ -635,7 +607,6 @@ class AdminController extends Controller
     {
         $query = Movement::with(['user', 'bar']);
 
-        // Filtros
         if ($request->filled('from')) {
             $query->whereDate('created_at', '>=', $request->from);
         }
@@ -748,10 +719,8 @@ class AdminController extends Controller
             'users.*' => 'exists:users,id',
         ]);
 
-        // Generar código único
         $code = strtoupper(\Illuminate\Support\Str::random(6));
 
-        // Verificar que el código sea único
         while (\App\Models\Ranking::where('code', $code)->exists()) {
             $code = strtoupper(\Illuminate\Support\Str::random(6));
         }
@@ -762,10 +731,9 @@ class AdminController extends Controller
             'creator_id' => $validated['creator_id'],
         ]);
 
-        // Añadir usuarios al ranking
         $users = $validated['users'] ?? [];
         if (!in_array($validated['creator_id'], $users)) {
-            $users[] = $validated['creator_id']; // Añadir al creador si no está incluido
+            $users[] = $validated['creator_id']; 
         }
 
         foreach ($users as $userId) {
@@ -794,18 +762,15 @@ class AdminController extends Controller
 
         $ranking->update(['name' => $validated['name']]);
 
-        // Actualizar usuarios del ranking
         if (isset($validated['users'])) {
             $currentUsers = $ranking->users->pluck('id')->toArray();
             $newUsers = $validated['users'];
 
-            // Usuarios a añadir
             $usersToAdd = array_diff($newUsers, $currentUsers);
             foreach ($usersToAdd as $userId) {
                 $ranking->users()->attach($userId, ['points' => 0, 'month_record' => 0]);
             }
 
-            // Usuarios a eliminar
             $usersToRemove = array_diff($currentUsers, $newUsers);
             $ranking->users()->detach($usersToRemove);
         }
@@ -817,10 +782,8 @@ class AdminController extends Controller
     {
         $ranking = \App\Models\Ranking::findOrFail($id);
 
-        // Eliminar todas las relaciones
         $ranking->users()->detach();
 
-        // Eliminar el ranking
         $ranking->delete();
 
         return redirect()->route('admin.rankings')->with('success', 'Ranking eliminado correctamente');
@@ -830,13 +793,11 @@ class AdminController extends Controller
     {
         $ranking = \App\Models\Ranking::findOrFail($id);
 
-        // Guardar récords mensuales antes de resetear
         \Illuminate\Support\Facades\DB::table('ranking_users')
             ->where('ranking_id', $ranking->id)
             ->where('points', '>', \Illuminate\Support\Facades\DB::raw('month_record'))
             ->update(['month_record' => \Illuminate\Support\Facades\DB::raw('points')]);
 
-        // Resetear puntos
         \Illuminate\Support\Facades\DB::table('ranking_users')
             ->where('ranking_id', $ranking->id)
             ->update(['points' => 0]);
@@ -846,12 +807,10 @@ class AdminController extends Controller
 
     public function resetAllRankings()
     {
-        // Guardar récords mensuales
         \Illuminate\Support\Facades\DB::table('ranking_users')
             ->where('points', '>', \Illuminate\Support\Facades\DB::raw('month_record'))
             ->update(['month_record' => \Illuminate\Support\Facades\DB::raw('points')]);
 
-        // Reiniciar puntos
         \Illuminate\Support\Facades\DB::table('ranking_users')->update(['points' => 0]);
 
         return redirect()->route('admin.rankings')->with('success', 'Todos los rankings han sido reseteados correctamente');

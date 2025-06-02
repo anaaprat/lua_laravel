@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 
 class BarController extends Controller
 {
-    // Obtener información de un bar por su token (escaneado desde QR)
     public function getByToken(Request $request)
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
@@ -75,7 +74,6 @@ class BarController extends Controller
         ]);
     }
 
-    // Listar todos los bares disponibles
     public function index()
     {
         $bars = User::where('role', 'bar')

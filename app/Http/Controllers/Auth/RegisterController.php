@@ -45,7 +45,6 @@ class RegisterController extends Controller
         $user->qr_path = $filePath;
         $user->save();
 
-        // Autologin y redirigir
         auth()->login($user);
         return redirect()->route('bar.dashboard');
     }
