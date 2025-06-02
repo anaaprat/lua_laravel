@@ -81,28 +81,39 @@ Route::middleware(['auth', 'role:bar'])->group(function () {
 
     Route::post('/regenerate-my-qr', function () {
         $user = auth()->user();
+        $debugInfo = [];
 
         try {
+            $debugInfo[] = "User: " . $user->name;
+            $debugInfo[] = "Token: " . $user->token;
+
             $qr = QrCode::format('svg')->size(300)->generate($user->token);
+            $debugInfo[] = "QR generated successfully";
+
             $filePath = 'qrs/bar_' . $user->name . '.svg';
+            $debugInfo[] = "File path: " . $filePath;
 
             $qrDir = storage_path('app/public/qrs');
             if (!is_dir($qrDir)) {
                 mkdir($qrDir, 0755, true);
+                $debugInfo[] = "Created directory: " . $qrDir;
             }
 
             $result = Storage::disk('public')->put($filePath, $qr);
+            $debugInfo[] = "Storage result: " . ($result ? 'SUCCESS' : 'FAILED');
 
             if ($result) {
                 $user->qr_path = $filePath;
                 $user->save();
+                $debugInfo[] = "User updated successfully";
             }
 
         } catch (Exception $e) {
-            // Log error
+            $debugInfo[] = "ERROR: " . $e->getMessage();
         }
 
-        return redirect()->back()->with('success', 'QR generated!');
+        // Mostrar debug info temporalmente
+        return redirect()->back()->with('debug', implode('<br>', $debugInfo));
     })->name('regenerate-qr')->middleware('auth');
 
 });

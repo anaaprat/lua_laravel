@@ -30,6 +30,11 @@
     </div>
 
     <div class="bottom-section">
+        @if(session('debug'))
+            <div style="background: red; color: white; padding: 10px; font-size: 10px;">
+                {!! session('debug') !!}
+            </div>
+        @endif
         @if(auth()->user()->qr_path)
             <div class="qr-container">
                 <!-- DEBUG: Mostrar info del QR -->
