@@ -225,32 +225,49 @@ Route::get('/railway-setup', function () {
 
 Route::get('/fix-everything', function () {
     try {
-        // Crear directorio si no existe
         $qrDir = storage_path('app/public/qrs');
         if (!is_dir($qrDir)) {
             mkdir($qrDir, 0755, true);
+            echo "✅ Created qrs directory<br>";
         }
 
-        // Forzar recrear enlace
         $publicStorage = public_path('storage');
         if (file_exists($publicStorage)) {
-            if (is_dir($publicStorage)) {
-                rmdir($publicStorage);
+            if (is_link($publicStorage)) {
+                unlink($publicStorage);
+                echo "✅ Removed symlink<br>";
+            } elseif (is_file($publicStorage)) {
+                unlink($publicStorage);
+                echo "✅ Removed file<br>";
+            } elseif (is_dir($publicStorage)) {
+                function deleteDir($dirPath)
+                {
+                    if (!is_dir($dirPath))
+                        return false;
+                    $files = array_diff(scandir($dirPath), array('.', '..'));
+                    foreach ($files as $file) {
+                        $path = $dirPath . '/' . $file;
+                        is_dir($path) ? deleteDir($path) : unlink($path);
+                    }
+                    return rmdir($dirPath);
+                }
+                deleteDir($publicStorage);
+                echo "✅ Removed directory<br>";
             }
         }
 
-        // Crear enlace manualmente
         symlink(storage_path('app/public'), $publicStorage);
+        echo "✅ Created new symlink<br>";
 
-        // Regenerar QR del usuario actual
         $user = auth()->user();
         $qr = QrCode::format('svg')->size(300)->generate($user->token);
         $filePath = 'qrs/bar_' . $user->name . '.svg';
         Storage::disk('public')->put($filePath, $qr);
         $user->qr_path = $filePath;
         $user->save();
+        echo "✅ QR regenerated<br>";
 
-        return "✅ Everything fixed!";
+        return "🎉 Everything fixed!";
 
     } catch (Exception $e) {
         return "Error: " . $e->getMessage();
