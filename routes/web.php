@@ -272,4 +272,4 @@ Route::get('/fix-everything', function () {
     } catch (Exception $e) {
         return "Error: " . $e->getMessage();
     }
-})->middleware('auth');
+});
