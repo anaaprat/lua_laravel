@@ -7,11 +7,11 @@ use App\Http\Controllers\web\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\web\BarController;
-use App\Http\Controllers\web\OrderController;
-use App\Http\Controllers\web\StatisticsController;
-use App\Http\Controllers\web\BarProductController;
-use App\Http\Controllers\web\RechargeController;
+use App\Http\Controllers\Web\BarController;
+use App\Http\Controllers\Web\OrderController;
+use App\Http\Controllers\Web\StatisticsController;
+use App\Http\Controllers\Web\BarProductController;
+use App\Http\Controllers\Web\RechargeController;
 
 
 /*
