@@ -123,25 +123,30 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // Rutas railway 
-Route::get('/debug-views', function () {
-    $basePath = resource_path('views');
-    $authPath = resource_path('views/auth');
-
-    echo "Base views path: " . $basePath . "<br>";
-    echo "Base views path exists: " . (is_dir($basePath) ? 'YES' : 'NO') . "<br>";
-    echo "Auth views path: " . $authPath . "<br>";
-    echo "Auth views path exists: " . (is_dir($authPath) ? 'YES' : 'NO') . "<br>";
-
-    if (is_dir($authPath)) {
-        $files = scandir($authPath);
-        echo "Files in auth folder: " . implode(', ', $files) . "<br>";
-    }
-
-    echo "View exists check: " . (view()->exists('auth.login') ? 'YES' : 'NO') . "<br>";
-
+Route::get('/fix-auth', function () {
     try {
-        return view('auth.login');
+        $authPath = resource_path('views/auth');
+
+        // Verificar si podemos crear la carpeta
+        if (!is_dir($authPath)) {
+            mkdir($authPath, 0755, true);
+            echo "Created auth directory<br>";
+        }
+
+        // Listar contenido del directorio views
+        $viewsPath = resource_path('views');
+        $contents = scandir($viewsPath);
+        echo "Contents of views: " . implode(', ', $contents) . "<br>";
+
+        // Verificar si hay algún auth con diferente case
+        foreach ($contents as $item) {
+            if (strtolower($item) === 'auth') {
+                echo "Found auth folder with case: " . $item . "<br>";
+            }
+        }
+
+        return "Debug complete";
     } catch (Exception $e) {
-        return "Error loading view: " . $e->getMessage();
+        return "Error: " . $e->getMessage();
     }
 });
