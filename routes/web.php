@@ -121,24 +121,3 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/rankings/reset-all', [AdminController::class, 'resetAllRankings'])->name('rankings.reset-all');
 
 });
-
-// Rutas railway 
-Route::get('/check-folders', function() {
-    $viewsPath = resource_path('views');
-    
-    // Verificar Auth (mayúscula)
-    $authUpper = $viewsPath . '/Auth';
-    if (is_dir($authUpper)) {
-        $files = scandir($authUpper);
-        echo "Auth (uppercase) contains: " . implode(', ', $files) . "<br>";
-    }
-    
-    // Verificar auth (minúscula)  
-    $authLower = $viewsPath . '/auth';
-    if (is_dir($authLower)) {
-        $files = scandir($authLower);
-        echo "auth (lowercase) contains: " . implode(', ', $files) . "<br>";
-    }
-    
-    return "Check complete";
-});
