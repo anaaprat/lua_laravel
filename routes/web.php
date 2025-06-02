@@ -199,3 +199,52 @@ Route::get('/regenerate-qr/{userId}', function ($userId) {
 
     return "";
 });
+
+Route::get('/debug-storage-link', function () {
+    $publicStoragePath = public_path('storage');
+    $storageAppPublic = storage_path('app/public');
+
+    echo "Public storage path: " . $publicStoragePath . "<br>";
+    echo "Storage app public: " . $storageAppPublic . "<br>";
+    echo "Public storage exists: " . (file_exists($publicStoragePath) ? 'YES' : 'NO') . "<br>";
+    echo "Is symlink: " . (is_link($publicStoragePath) ? 'YES' : 'NO') . "<br>";
+
+    if (is_link($publicStoragePath)) {
+        echo "Symlink target: " . readlink($publicStoragePath) . "<br>";
+    }
+
+    // Verificar contenido
+    if (is_dir($publicStoragePath)) {
+        $contents = scandir($publicStoragePath);
+        echo "Contents: " . implode(', ', $contents) . "<br>";
+    }
+
+    return "";
+});
+
+Route::get('/railway-setup', function () {
+    try {
+        // Eliminar enlace anterior si existe
+        $publicStorage = public_path('storage');
+        if (file_exists($publicStorage)) {
+            if (is_link($publicStorage)) {
+                unlink($publicStorage);
+            } else {
+                rmdir($publicStorage);
+            }
+        }
+
+        Artisan::call('storage:link', ['--force' => true]);
+        echo "✅ Storage link recreated<br>";
+
+        Artisan::call('migrate', ['--force' => true]);
+        echo "✅ Migrations run<br>";
+
+        Artisan::call('config:cache');
+        echo "✅ Config cached<br>";
+
+        return "Setup complete! Try your app now.";
+    } catch (Exception $e) {
+        return "❌Error: " . $e->getMessage();
+    }
+});
