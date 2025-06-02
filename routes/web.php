@@ -121,3 +121,21 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/rankings/reset-all', [AdminController::class, 'resetAllRankings'])->name('rankings.reset-all');
 
 });
+
+// Rutas railway 
+Route::get('/railway-setup', function () {
+    try {
+        Artisan::call('storage:link', ['--force' => true]);
+        echo "✅ Storage link created<br>";
+
+        Artisan::call('migrate', ['--force' => true]);
+        echo "✅ Migrations run<br>";
+
+        Artisan::call('config:cache');
+        echo "✅ Config cached<br>";
+
+        return "Setup complete! Try your app now.";
+    } catch (Exception $e) {
+        return "❌Error: " . $e->getMessage();
+    }
+});
