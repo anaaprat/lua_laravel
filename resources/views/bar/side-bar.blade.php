@@ -32,13 +32,15 @@
     <div class="bottom-section">
         @if(auth()->user()->qr_path)
             <div class="qr-container">
-                <a href="{{ asset('storage/' . auth()->user()->qr_path) }}" download="qr_bar_{{ auth()->user()->id }}.svg">
-                    <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
-                </a>
-
-                <p style="color: white; font-size: 12px; text-align: center; margin-top: 8px;">
-                    Click on the QR to download it
-                </p>
+                <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
+            </div>
+        @else
+            <div class="qr-container">
+                <p>QR not generated</p>
+                <form action="{{ route('regenerate-qr') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-primary">Generate QR</button>
+                </form>
             </div>
         @endif
 

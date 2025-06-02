@@ -78,6 +78,32 @@ Route::middleware(['auth', 'role:bar'])->group(function () {
 
     Route::get('/bar/orders/ajax', [BarController::class, 'getOrdersAjax'])->name('bar.orders.ajax');
 
+    Route::post('/regenerate-my-qr', function () {
+        $user = auth()->user();
+
+        try {
+            $qr = QrCode::format('svg')->size(300)->generate($user->token);
+            $filePath = 'qrs/bar_' . $user->name . '.svg';
+
+            $qrDir = storage_path('app/public/qrs');
+            if (!is_dir($qrDir)) {
+                mkdir($qrDir, 0755, true);
+            }
+
+            $result = Storage::disk('public')->put($filePath, $qr);
+
+            if ($result) {
+                $user->qr_path = $filePath;
+                $user->save();
+            }
+
+        } catch (Exception $e) {
+            // Log error
+        }
+
+        return redirect()->back()->with('success', 'QR generated!');
+    })->name('regenerate-qr')->middleware('auth');
+
 });
 
 // Rutas ADMIN
