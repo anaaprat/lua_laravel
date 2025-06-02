@@ -224,26 +224,40 @@ Route::get('/debug-storage-link', function () {
 
 Route::get('/railway-setup', function () {
     try {
-        // Eliminar enlace anterior si existe
+        // Eliminar carpeta storage (no enlace)
         $publicStorage = public_path('storage');
         if (file_exists($publicStorage)) {
-            if (is_link($publicStorage)) {
-                unlink($publicStorage);
-            } else {
-                rmdir($publicStorage);
+            // Eliminar recursivamente toda la carpeta
+            function deleteDirectory($dir)
+            {
+                if (!file_exists($dir))
+                    return true;
+                if (!is_dir($dir))
+                    return unlink($dir);
+                foreach (scandir($dir) as $item) {
+                    if ($item == '.' || $item == '..')
+                        continue;
+                    if (!deleteDirectory($dir . DIRECTORY_SEPARATOR . $item))
+                        return false;
+                }
+                return rmdir($dir);
             }
+            deleteDirectory($publicStorage);
+            echo "✅ Removed old storage directory<br>";
         }
 
+        // Crear enlace simbólico
         Artisan::call('storage:link', ['--force' => true]);
-        echo "✅ Storage link recreated<br>";
+        echo "✅ Storage symlink created<br>";
 
-        Artisan::call('migrate', ['--force' => true]);
-        echo "✅ Migrations run<br>";
+        // Verificar que es enlace
+        if (is_link($publicStorage)) {
+            echo "✅ Confirmed: Is now a symlink<br>";
+        } else {
+            echo "❌ Still not a symlink<br>";
+        }
 
-        Artisan::call('config:cache');
-        echo "✅ Config cached<br>";
-
-        return "Setup complete! Try your app now.";
+        return "Setup complete!";
     } catch (Exception $e) {
         return "❌Error: " . $e->getMessage();
     }
