@@ -30,23 +30,38 @@
     </div>
 
     <div class="bottom-section">
-        @if(auth()->user()->qr_path)
+        @if(session('success'))
+            <div class="alert alert-success" style="font-size: 12px; margin-bottom: 10px; padding: 8px;">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @php
+            $user = auth()->user();
+            $hasQR = $user->qr_path && file_exists(storage_path('app/public/' . $user->qr_path));
+        @endphp
+
+        @if($hasQR)
             <div class="qr-container">
-
-                <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
-
-                <form action="{{ route('regenerate-qr') }}" method="POST" style="margin-top:10px;">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-secondary">Generate QR</button>
-                </form>
+                <a href="{{ asset('storage/' . $user->qr_path) }}" download="qr_bar_{{ $user->id }}.svg">
+                    <img src="{{ asset('storage/' . $user->qr_path) }}" alt="QR Code" class="qr-img">
+                </a>
+                <p style="color: white; font-size: 12px; text-align: center; margin-top: 8px;">
+                    Click on the QR to download it
+                </p>
             </div>
         @else
             <div class="qr-container">
-                <p>QR not generated</p>
-                <form action="{{ route('regenerate-qr') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-primary">Generate QR</button>
-                </form>
+                <div style="color: white; text-align: center; padding: 20px;">
+                    <i class="fas fa-qrcode" style="font-size: 48px; opacity: 0.3; margin-bottom: 10px;"></i>
+                    <p style="margin-bottom: 15px;">QR Code not available</p>
+                    <form action="{{ route('regenerate-qr') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-magic"></i> Generate QR
+                        </button>
+                    </form>
+                </div>
             </div>
         @endif
 
