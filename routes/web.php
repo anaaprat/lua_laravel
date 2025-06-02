@@ -275,4 +275,4 @@ Route::get('/quick-check', function () {
     }
 
     return "";
-})->middleware('auth');
+});
