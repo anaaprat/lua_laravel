@@ -165,3 +165,37 @@ Route::get('/debug-current-user', function () {
 
     return "";
 });
+
+Route::get('/regenerate-qr/{userId}', function ($userId) {
+    $user = \App\Models\User::find($userId);
+    if (!$user)
+        return "User not found";
+
+    try {
+        $qr = QrCode::format('svg')->size(300)->generate($user->token);
+        $filePath = 'qrs/bar_' . $user->name . '.svg';
+
+        // Crear directorio si no existe
+        $qrDir = storage_path('app/public/qrs');
+        if (!is_dir($qrDir)) {
+            mkdir($qrDir, 0755, true);
+            echo "Created qrs directory<br>";
+        }
+
+        $result = Storage::disk('public')->put($filePath, $qr);
+
+        if ($result) {
+            $user->qr_path = $filePath;
+            $user->save();
+            echo "✅ QR regenerated successfully!<br>";
+            echo "Path: " . $filePath . "<br>";
+        } else {
+            echo "❌ Failed to save QR<br>";
+        }
+
+    } catch (Exception $e) {
+        echo "❌ Error: " . $e->getMessage();
+    }
+
+    return "";
+});
