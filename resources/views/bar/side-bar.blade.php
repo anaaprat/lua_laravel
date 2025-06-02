@@ -32,7 +32,19 @@
     <div class="bottom-section">
         @if(auth()->user()->qr_path)
             <div class="qr-container">
+                <!-- DEBUG: Mostrar info del QR -->
+                <p style="font-size:10px; color:white;">
+                    Path: {{ auth()->user()->qr_path }}<br>
+                    URL: {{ asset('storage/' . auth()->user()->qr_path) }}
+                </p>
+
                 <img src="{{ asset('storage/' . auth()->user()->qr_path) }}" alt="QR Code" class="qr-img">
+
+                <!-- Botón de regenerar por si acaso -->
+                <form action="{{ route('regenerate-qr') }}" method="POST" style="margin-top:10px;">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-secondary">Regenerate QR</button>
+                </form>
             </div>
         @else
             <div class="qr-container">
