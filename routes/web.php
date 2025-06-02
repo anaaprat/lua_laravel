@@ -123,19 +123,25 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // Rutas railway 
-Route::get('/railway-setup', function () {
+Route::get('/debug-views', function () {
+    $basePath = resource_path('views');
+    $authPath = resource_path('views/auth');
+
+    echo "Base views path: " . $basePath . "<br>";
+    echo "Base views path exists: " . (is_dir($basePath) ? 'YES' : 'NO') . "<br>";
+    echo "Auth views path: " . $authPath . "<br>";
+    echo "Auth views path exists: " . (is_dir($authPath) ? 'YES' : 'NO') . "<br>";
+
+    if (is_dir($authPath)) {
+        $files = scandir($authPath);
+        echo "Files in auth folder: " . implode(', ', $files) . "<br>";
+    }
+
+    echo "View exists check: " . (view()->exists('auth.login') ? 'YES' : 'NO') . "<br>";
+
     try {
-        Artisan::call('storage:link', ['--force' => true]);
-        echo "✅ Storage link created<br>";
-
-        Artisan::call('migrate', ['--force' => true]);
-        echo "✅ Migrations run<br>";
-
-        Artisan::call('config:cache');
-        echo "✅ Config cached<br>";
-
-        return "Setup complete! Try your app now.";
+        return view('auth.login');
     } catch (Exception $e) {
-        return "❌Error: " . $e->getMessage();
+        return "Error loading view: " . $e->getMessage();
     }
 });
