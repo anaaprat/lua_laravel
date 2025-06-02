@@ -254,3 +254,25 @@ Route::get('/emergency-storage-fix', function () {
         return "Error: " . $e->getMessage();
     }
 });
+
+Route::get('/quick-check', function () {
+    $publicStorage = public_path('storage');
+    echo "Public storage exists: " . (file_exists($publicStorage) ? 'YES' : 'NO') . "<br>";
+    echo "Is symlink: " . (is_link($publicStorage) ? 'YES' : 'NO') . "<br>";
+
+    if (is_link($publicStorage)) {
+        echo "✅ Storage link is working<br>";
+
+        // Verificar QR específico
+        $user = auth()->user();
+        if ($user && $user->qr_path) {
+            $qrPath = storage_path('app/public/' . $user->qr_path);
+            echo "QR file exists: " . (file_exists($qrPath) ? 'YES' : 'NO') . "<br>";
+            echo "QR path: " . $user->qr_path . "<br>";
+        }
+    } else {
+        echo "❌ Storage link broken<br>";
+    }
+
+    return "";
+})->middleware('auth');
