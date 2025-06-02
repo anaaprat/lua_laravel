@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/jpeg" href="{{ asset('storage/images/lualogo.jpeg') }}">
     <title>Login - LUA</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link
