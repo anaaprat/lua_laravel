@@ -37,7 +37,7 @@
 
                 <form action="{{ route('regenerate-qr') }}" method="POST" style="margin-top:10px;">
                     @csrf
-                    <button type="submit" class="btn btn-sm btn-secondary">Regenerate QR</button>
+                    <button type="submit" class="btn btn-sm btn-secondary">Generate QR</button>
                 </form>
             </div>
         @else
