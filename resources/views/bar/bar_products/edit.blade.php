@@ -255,6 +255,12 @@
             margin-top: 0.5rem;
         }
 
+        .form-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
         @media (max-width: 992px) {
             .form-page {
                 margin-left: var(--sidebar-collapsed);
@@ -399,11 +405,24 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Is it alcoholic?</label>
-                    <select name="es_copa" class="form-control">
-                        <option value="0" {{ $barProduct->product->es_copa == 0 ? 'selected' : '' }}>No</option>
-                        <option value="1" {{ $barProduct->product->es_copa == 1 ? 'selected' : '' }}>Yes</option>
+                    <label>Category:</label>
+                    <select name="type" id="product-type" class="form-control">
+                        <option value="food" {{ $barProduct->product->type == 'food' ? 'selected' : '' }}>Food</option>
+                        <option value="drink" {{ $barProduct->product->type == 'drink' ? 'selected' : '' }}>Drink</option>
+                        <option value="other" {{ $barProduct->product->type == 'other' ? 'selected' : '' }}>Other</option>
                     </select>
+                </div>
+
+                <div class="form-group" id="alcoholic-field"
+                    style="{{ $barProduct->product->type == 'drink' ? 'display: block;' : 'display: none;' }}">
+                    <label>Is it alcoholic? (for rankings)</label>
+                    <select name="is_drink" class="form-control">
+                        <option value="0" {{ $barProduct->product->is_drink == 0 ? 'selected' : '' }}>No - Non-alcoholic
+                        </option>
+                        <option value="1" {{ $barProduct->product->is_drink == 1 ? 'selected' : '' }}>Yes - Alcoholic
+                        </option>
+                    </select>
+                    <div class="form-text">Alcoholic drinks appear in the drinks ranking</div>
                 </div>
 
                 <div class="form-group">
@@ -468,6 +487,32 @@
                 document.querySelector('.image-upload-container').classList.remove('has-image');
             }
         }
+
+        // Manejar la lógica de bebidas alcohólicas
+        document.getElementById('product-type').addEventListener('change', function () {
+            const alcoholicField = document.getElementById('alcoholic-field');
+            const isDrinkSelect = document.querySelector('select[name="is_drink"]');
+
+            if (this.value === 'drink') {
+                alcoholicField.style.display = 'block';
+                if (isDrinkSelect.value === '' || isDrinkSelect.value === null) {
+                    isDrinkSelect.value = '1'; // Por defecto, las bebidas son alcohólicas
+                }
+            } else {
+                alcoholicField.style.display = 'none';
+                isDrinkSelect.value = '0'; // No es bebida alcohólica
+            }
+        });
+
+        // Mantener estado al cargar la página
+        document.addEventListener('DOMContentLoaded', function () {
+            const typeSelect = document.getElementById('product-type');
+            const alcoholicField = document.getElementById('alcoholic-field');
+
+            if (typeSelect.value === 'drink') {
+                alcoholicField.style.display = 'block';
+            }
+        });
     </script>
 </body>
 

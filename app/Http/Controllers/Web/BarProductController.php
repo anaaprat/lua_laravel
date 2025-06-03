@@ -58,6 +58,10 @@ class BarProductController extends Controller
             $rules['type'] = 'required|string|in:food,drink,other';
             $rules['is_drink'] = 'required|in:0,1';
             $rules['description'] = 'nullable|string';
+        } else {
+            // Al editar producto existente, también pueden cambiar type e is_drink
+            $rules['type'] = 'required|string|in:food,drink,other';
+            $rules['is_drink'] = 'required|in:0,1';
         }
 
         $validatedData = $request->validate($rules);
@@ -111,15 +115,30 @@ class BarProductController extends Controller
                 Log::info('Producto encontrado:', $product->toArray());
 
                 // Si se subió una nueva imagen para un producto existente, actualizamos el producto
-                if ($imagePath) {
-                    // Eliminar imagen anterior si existe
-                    if ($product->image_url && Storage::disk('public')->exists($product->image_url)) {
-                        Storage::disk('public')->delete($product->image_url);
-                        Log::info('Imagen anterior eliminada:', ['path' => $product->image_url]);
+                if ($imagePath || $request->has('type') || $request->has('is_drink')) {
+                    $updateData = [];
+
+                    if ($imagePath) {
+                        // Eliminar imagen anterior si existe
+                        if ($product->image_url && Storage::disk('public')->exists($product->image_url)) {
+                            Storage::disk('public')->delete($product->image_url);
+                            Log::info('Imagen anterior eliminada:', ['path' => $product->image_url]);
+                        }
+                        $updateData['image_url'] = $imagePath;
                     }
 
-                    $product->update(['image_url' => $imagePath]);
-                    Log::info('Imagen del producto actualizada');
+                    if ($request->has('type')) {
+                        $updateData['type'] = $request->type;
+                    }
+
+                    if ($request->has('is_drink')) {
+                        $updateData['is_drink'] = $request->is_drink;
+                    }
+
+                    if (!empty($updateData)) {
+                        $product->update($updateData);
+                        Log::info('Producto actualizado con nuevos datos');
+                    }
                 }
 
                 $existingBarProduct = BarProduct::where('user_id', Auth::id())
@@ -216,6 +235,8 @@ class BarProductController extends Controller
             'stock' => 'required|integer|min:0',
             'available' => 'required|boolean',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'type' => 'required|string|in:food,drink,other',
+            'is_drink' => 'required|in:0,1',
         ]);
 
         try {
@@ -243,6 +264,20 @@ class BarProductController extends Controller
 
                 // Actualizar el producto con la nueva imagen
                 $barProduct->product->update(['image_url' => $imagePath]);
+            }
+
+            // Actualizar tipo y is_drink del producto si han cambiado
+            $productUpdateData = [];
+            if ($request->type !== $barProduct->product->type) {
+                $productUpdateData['type'] = $request->type;
+            }
+            if ($request->is_drink != $barProduct->product->is_drink) {
+                $productUpdateData['is_drink'] = $request->is_drink;
+            }
+
+            if (!empty($productUpdateData)) {
+                $barProduct->product->update($productUpdateData);
+                Log::info('Producto actualizado:', $productUpdateData);
             }
 
             $barProduct->update($updateData);

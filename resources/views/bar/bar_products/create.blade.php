@@ -238,6 +238,12 @@
             margin-top: 0.5rem;
         }
 
+        .form-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
         @media (max-width: 992px) {
             .form-page {
                 margin-left: var(--sidebar-collapsed);
@@ -368,23 +374,23 @@
                         <textarea name="description" rows="2" class="form-control">{{ old('description') }}</textarea>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Type:</label>
-                            <select name="type" class="form-control">
-                                <option value="food" {{ old('type') == 'food' ? 'selected' : '' }}>Food</option>
-                                <option value="drink" {{ old('type') == 'drink' ? 'selected' : '' }}>Drink</option>
-                                <option value="other" {{ old('type') == 'other' ? 'selected' : '' }}>Other</option>
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label>Category:</label>
+                        <select name="type" id="product-type" class="form-control">
+                            <option value="food" {{ old('type') == 'food' ? 'selected' : '' }}>Food</option>
+                            <option value="drink" {{ old('type') == 'drink' ? 'selected' : '' }}>Drink</option>
+                            <option value="other" {{ old('type') == 'other' ? 'selected' : '' }}>Other</option>
+                        </select>
+                    </div>
 
-                        <div class="form-group">
-                            <label>Is it a drink? (for rankings)</label>
-                            <select name="is_drink" class="form-control">
-                                <option value="1" {{ old('is_drink') == '1' ? 'selected' : '' }}>Yes</option>
-                                <option value="0" {{ old('is_drink') == '0' ? 'selected' : '' }}>No</option>
-                            </select>
-                        </div>
+                    <div class="form-group" id="alcoholic-field"
+                        style="{{ old('type') == 'drink' ? 'display: block;' : 'display: none;' }}">
+                        <label>Is it alcoholic? (for rankings)</label>
+                        <select name="is_drink" class="form-control">
+                            <option value="0" {{ old('is_drink') == '0' ? 'selected' : '' }}>No - Non-alcoholic</option>
+                            <option value="1" {{ old('is_drink') == '1' ? 'selected' : '' }}>Yes - Alcoholic</option>
+                        </select>
+                        <div class="form-text">Alcoholic drinks appear in the drinks ranking</div>
                     </div>
 
                     <div class="divider"></div>
@@ -493,6 +499,30 @@
             document.getElementById('image-preview-container').style.display = 'none';
             document.querySelector('.image-upload-container').classList.remove('has-image');
         }
+
+        // Manejar la lógica de bebidas alcohólicas
+        document.getElementById('product-type').addEventListener('change', function () {
+            const alcoholicField = document.getElementById('alcoholic-field');
+            const isDrinkSelect = document.querySelector('select[name="is_drink"]');
+
+            if (this.value === 'drink') {
+                alcoholicField.style.display = 'block';
+                isDrinkSelect.value = '1'; // Por defecto, las bebidas son alcohólicas
+            } else {
+                alcoholicField.style.display = 'none';
+                isDrinkSelect.value = '0'; // No es bebida alcohólica
+            }
+        });
+
+        // Mantener estado al cargar la página
+        document.addEventListener('DOMContentLoaded', function () {
+            const typeSelect = document.getElementById('product-type');
+            const alcoholicField = document.getElementById('alcoholic-field');
+
+            if (typeSelect.value === 'drink') {
+                alcoholicField.style.display = 'block';
+            }
+        });
     </script>
 </body>
 
