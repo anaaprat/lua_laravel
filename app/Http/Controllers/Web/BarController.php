@@ -46,7 +46,7 @@ class BarController extends Controller
         return response()->json([
             'pending_count' => $pendingOrders->count(),
             'completed_count' => $completedOrders->count(),
-            'total_sales' => number_format($completedOrders->sum('total'), 2),
+            'total_sales' => number_format($pendingOrders->sum('total') + $completedOrders->sum('total'), 2),
             'pending_orders_html' => $pendingOrdersHtml,
             'completed_orders_html' => $completedOrdersHtml,
             'timestamp' => now()->format('H:i:s')
