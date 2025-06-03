@@ -170,6 +170,91 @@
             margin-bottom: 0;
         }
 
+        /* Estilos para el upload de imagen */
+        .image-upload-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px dashed #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .image-upload-container:hover {
+            border-color: var(--primary);
+            background-color: rgba(132, 169, 140, 0.05);
+        }
+
+        .image-upload-container.has-image {
+            border-style: solid;
+            border-color: var(--primary);
+        }
+
+        .current-image {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+
+        .image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .upload-hint {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .remove-image {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .current-image-container {
+            text-align: center;
+        }
+
+        .change-image-text {
+            color: var(--primary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
         @media (max-width: 992px) {
             .form-page {
                 margin-left: var(--sidebar-collapsed);
@@ -255,9 +340,45 @@
                 <p>{{ $barProduct->product->description }}</p>
             </div>
 
-            <form action="{{ route('bar-products.update', $barProduct) }}" method="POST">
+            <form action="{{ route('bar-products.update', $barProduct) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
+
+                <!-- Sección de imagen -->
+                <div class="section-title">
+                    <i class="fas fa-image"></i> Product Image
+                </div>
+
+                <div class="form-group">
+                    <label>Product Image:</label>
+                    <div class="image-upload-container {{ $barProduct->product->image_url ? 'has-image' : '' }}"
+                        onclick="document.getElementById('image-input').click()">
+                        <input type="file" id="image-input" name="image" class="file-input" accept="image/*">
+
+                        @if($barProduct->product->image_url)
+                            <div id="current-image-container" class="current-image-container">
+                                <img src="{{ asset('storage/' . $barProduct->product->image_url) }}" alt="Current image"
+                                    class="current-image">
+                                <div class="change-image-text">Click to change image</div>
+                            </div>
+                        @else
+                            <div id="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                <div class="upload-text">Click to upload product image</div>
+                                <div class="upload-hint">JPG, PNG, GIF up to 2MB</div>
+                            </div>
+                        @endif
+
+                        <div id="image-preview-container" style="display: none;">
+                            <img id="image-preview" src="" alt="Preview" class="image-preview">
+                            <button type="button" class="remove-image" onclick="removeImage(event)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
 
                 <div class="section-title">
                     <i class="fas fa-tag"></i> Product Details
@@ -299,6 +420,55 @@
             </form>
         </div>
     </div>
+
+    <script>
+        // Manejar preview de imagen
+        document.getElementById('image-input').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('image-preview').src = e.target.result;
+
+                    // Ocultar imagen actual y placeholder
+                    const currentImageContainer = document.getElementById('current-image-container');
+                    const uploadPlaceholder = document.getElementById('upload-placeholder');
+
+                    if (currentImageContainer) {
+                        currentImageContainer.style.display = 'none';
+                    }
+                    if (uploadPlaceholder) {
+                        uploadPlaceholder.style.display = 'none';
+                    }
+
+                    // Mostrar preview
+                    document.getElementById('image-preview-container').style.display = 'block';
+                    document.querySelector('.image-upload-container').classList.add('has-image');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Función para remover imagen
+        function removeImage(event) {
+            event.stopPropagation();
+
+            document.getElementById('image-input').value = '';
+            document.getElementById('image-preview').src = '';
+            document.getElementById('image-preview-container').style.display = 'none';
+
+            // Mostrar imagen actual o placeholder
+            const currentImageContainer = document.getElementById('current-image-container');
+            const uploadPlaceholder = document.getElementById('upload-placeholder');
+
+            if (currentImageContainer) {
+                currentImageContainer.style.display = 'block';
+            } else if (uploadPlaceholder) {
+                uploadPlaceholder.style.display = 'block';
+                document.querySelector('.image-upload-container').classList.remove('has-image');
+            }
+        }
+    </script>
 </body>
 
 </html>

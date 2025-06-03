@@ -171,6 +171,73 @@
             border: 1px solid #86efac;
         }
 
+        /* Estilos para el upload de imagen */
+        .image-upload-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px dashed #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .image-upload-container:hover {
+            border-color: var(--primary);
+            background-color: rgba(132, 169, 140, 0.05);
+        }
+
+        .image-upload-container.has-image {
+            border-style: solid;
+            border-color: var(--primary);
+        }
+
+        .image-preview {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .upload-hint {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .remove-image {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
         @media (max-width: 992px) {
             .form-page {
                 margin-left: var(--sidebar-collapsed);
@@ -269,7 +336,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('bar-products.store') }}" method="POST">
+            <form action="{{ route('bar-products.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="form-group">
@@ -323,6 +390,33 @@
                     <div class="divider"></div>
                 </div>
 
+                <!-- Sección de imagen -->
+                <div class="section-title">
+                    <i class="fas fa-image"></i> Product Image
+                </div>
+
+                <div class="form-group">
+                    <label>Product Image:</label>
+                    <div class="image-upload-container" onclick="document.getElementById('image-input').click()">
+                        <input type="file" id="image-input" name="image" class="file-input" accept="image/*">
+
+                        <div id="upload-placeholder">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <div class="upload-text">Click to upload product image</div>
+                            <div class="upload-hint">JPG, PNG, GIF up to 2MB</div>
+                        </div>
+
+                        <div id="image-preview-container" style="display: none;">
+                            <img id="image-preview" src="" alt="Preview" class="image-preview">
+                            <button type="button" class="remove-image" onclick="removeImage(event)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
                 <div class="section-title">
                     <i class="fas fa-tag"></i> Product Details for Your Bar
                 </div>
@@ -373,6 +467,32 @@
                 newFields.classList.remove('hidden');
             }
         });
+
+        // Manejar preview de imagen
+        document.getElementById('image-input').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('image-preview').src = e.target.result;
+                    document.getElementById('upload-placeholder').style.display = 'none';
+                    document.getElementById('image-preview-container').style.display = 'block';
+                    document.querySelector('.image-upload-container').classList.add('has-image');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Función para remover imagen
+        function removeImage(event) {
+            event.stopPropagation();
+
+            document.getElementById('image-input').value = '';
+            document.getElementById('image-preview').src = '';
+            document.getElementById('upload-placeholder').style.display = 'block';
+            document.getElementById('image-preview-container').style.display = 'none';
+            document.querySelector('.image-upload-container').classList.remove('has-image');
+        }
     </script>
 </body>
 

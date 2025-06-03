@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 
 class BarProductController extends Controller
@@ -49,6 +50,7 @@ class BarProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'available' => 'required|in:0,1',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
 
         if ($request->product_option === 'new') {
@@ -67,6 +69,14 @@ class BarProductController extends Controller
             Log::info('Transacción iniciada');
 
             $product = null;
+            $imagePath = null;
+
+            // Procesar imagen si se subió
+            if ($request->hasFile('image')) {
+                Log::info('Procesando imagen subida');
+                $imagePath = $request->file('image')->store('products', 'public');
+                Log::info('Imagen guardada en:', ['path' => $imagePath]);
+            }
 
             if ($request->product_option === 'new') {
                 Log::info('Creando nuevo producto');
@@ -80,12 +90,18 @@ class BarProductController extends Controller
                         ->withInput();
                 }
 
-                $product = Product::create([
+                $productData = [
                     'name' => $request->product_name,
                     'description' => $request->description,
                     'type' => $request->type,
                     'is_drink' => $request->is_drink ? 1 : 0,
-                ]);
+                ];
+
+                if ($imagePath) {
+                    $productData['image_url'] = $imagePath;
+                }
+
+                $product = Product::create($productData);
 
                 Log::info('Nuevo producto creado:', $product->toArray());
             } else {
@@ -93,6 +109,18 @@ class BarProductController extends Controller
 
                 $product = Product::findOrFail($request->product_option);
                 Log::info('Producto encontrado:', $product->toArray());
+
+                // Si se subió una nueva imagen para un producto existente, actualizamos el producto
+                if ($imagePath) {
+                    // Eliminar imagen anterior si existe
+                    if ($product->image_url && Storage::disk('public')->exists($product->image_url)) {
+                        Storage::disk('public')->delete($product->image_url);
+                        Log::info('Imagen anterior eliminada:', ['path' => $product->image_url]);
+                    }
+
+                    $product->update(['image_url' => $imagePath]);
+                    Log::info('Imagen del producto actualizada');
+                }
 
                 $existingBarProduct = BarProduct::where('user_id', Auth::id())
                     ->where('product_id', $product->id)
@@ -137,6 +165,13 @@ class BarProductController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // Limpiar imagen si hubo error
+            if ($imagePath && Storage::disk('public')->exists($imagePath)) {
+                Storage::disk('public')->delete($imagePath);
+                Log::info('Imagen limpiada debido a error');
+            }
+
             Log::error('Error en store:', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -180,21 +215,48 @@ class BarProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'available' => 'required|boolean',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         try {
-            $barProduct->update([
+            DB::beginTransaction();
+
+            $updateData = [
                 'price' => $request->price,
                 'stock' => $request->stock,
                 'available' => $request->available ? 1 : 0,
-            ]);
+            ];
+
+            // Procesar nueva imagen si se subió
+            if ($request->hasFile('image')) {
+                Log::info('Procesando nueva imagen');
+
+                // Eliminar imagen anterior si existe
+                if ($barProduct->product->image_url && Storage::disk('public')->exists($barProduct->product->image_url)) {
+                    Storage::disk('public')->delete($barProduct->product->image_url);
+                    Log::info('Imagen anterior eliminada:', ['path' => $barProduct->product->image_url]);
+                }
+
+                // Guardar nueva imagen
+                $imagePath = $request->file('image')->store('products', 'public');
+                Log::info('Nueva imagen guardada en:', ['path' => $imagePath]);
+
+                // Actualizar el producto con la nueva imagen
+                $barProduct->product->update(['image_url' => $imagePath]);
+            }
+
+            $barProduct->update($updateData);
 
             Log::info('BarProduct actualizado:', $barProduct->fresh()->toArray());
+
+            DB::commit();
 
             return redirect()->route('bar-products.index')
                 ->with('success', 'Product updated successfully!');
 
         } catch (\Exception $e) {
+            DB::rollBack();
+
             Log::error('Error en update:', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
