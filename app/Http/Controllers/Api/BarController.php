@@ -62,11 +62,7 @@ class BarController extends Controller
                     'is_drink' => $barProduct->product->is_drink,
                     'type' => $barProduct->product->type,
                     'price' => $barProduct->price,
-                    'image_url' => $barProduct->product->image_url ? str_replace(
-                        'http://127.0.0.1:8000',
-                        'https://web-production-17b8.up.railway.app',
-                        url('storage/' . $barProduct->product->image_url)
-                    ) : null,
+                    'image_url' => $this->getImageUrl($barProduct->product->image_url),
                     'stock' => $barProduct->stock,
                     'available' => $barProduct->available,
                     'bar_product_id' => $barProduct->id
@@ -87,5 +83,22 @@ class BarController extends Controller
         return response()->json([
             'bars' => $bars,
         ]);
+    }
+
+    private function getImageUrl($imageUrl)
+    {
+        if (!$imageUrl) {
+            return null;
+        }
+
+        if (str_starts_with($imageUrl, 'http://') || str_starts_with($imageUrl, 'https://')) {
+            return str_replace(
+                'http://127.0.0.1:8000',
+                'https://web-production-17b8.up.railway.app',
+                $imageUrl
+            );
+        }
+
+        return 'https://web-production-17b8.up.railway.app/storage/' . $imageUrl;
     }
 }
