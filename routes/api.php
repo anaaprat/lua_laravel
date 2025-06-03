@@ -1,12 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\BarController;
-use App\Http\Controllers\API\ProductController;
-use App\Http\Controllers\API\OrderController;
-use App\Http\Controllers\API\UserController;
-use App\Http\Controllers\API\RankingController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BarController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\RankingController;
 
 /*
 |--------------------------------------------------------------------------
