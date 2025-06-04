@@ -349,25 +349,6 @@
             </div>
         </div>
 
-        <form method="GET" action="{{ route('bar.statistics') }}" class="filter-form">
-            <div>
-                <label for="from">From:</label>
-                <input type="date" id="from" name="from" value="{{ request('from') }}">
-            </div>
-            <div>
-                <label for="to">To:</label>
-                <input type="date" id="to" name="to" value="{{ request('to') }}">
-            </div>
-            <button type="submit" class="btn-filter">
-                <i class="fas fa-filter"></i> Filter
-            </button>
-            @if(request('from') || request('to'))
-                <a href="{{ route('bar.statistics') }}" class="btn-filter" style="background-color: #475569;">
-                    <i class="fas fa-sync-alt"></i> Reset
-                </a>
-            @endif
-        </form>
-
         <!-- TOP PRODUCTS PRIMERO -->
         @if(isset($topProducts) && $topProducts->count() > 0)
             <div class="order-history-table">
@@ -410,7 +391,25 @@
             </div>
         @endif
 
-        <!-- ORDER HISTORY CON PAGINACIÓN -->
+        <form method="GET" action="{{ route('bar.statistics') }}" class="filter-form">
+            <div>
+                <label for="from">From:</label>
+                <input type="date" id="from" name="from" value="{{ request('from') }}">
+            </div>
+            <div>
+                <label for="to">To:</label>
+                <input type="date" id="to" name="to" value="{{ request('to') }}">
+            </div>
+            <button type="submit" class="btn-filter">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+            @if(request('from') || request('to'))
+                <a href="{{ route('bar.statistics') }}" class="btn-filter" style="background-color: #475569;">
+                    <i class="fas fa-sync-alt"></i> Reset
+                </a>
+            @endif
+        </form>
+
         <div class="order-history-table">
             <div class="table-header">
                 <div class="table-header-left">
