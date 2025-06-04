@@ -256,7 +256,7 @@
         .total-recharges {
             font-size: 1.1rem;
             font-weight: 600;
-            color: var(--color-positive);
+            color: #327b6d;
         }
 
         .recent-recharges {
