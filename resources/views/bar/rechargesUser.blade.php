@@ -232,9 +232,15 @@
         .section-header {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             margin-bottom: 1.5rem;
-            gap: 0.8rem;
             color: var(--color-text-dark);
+        }
+
+        .section-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
         }
 
         .section-header h2 {
@@ -245,6 +251,12 @@
         .section-header i {
             font-size: 1.3rem;
             color: var(--color-accent-green);
+        }
+
+        .total-recharges {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-positive);
         }
 
         .recent-recharges {
@@ -343,6 +355,67 @@
             border: 1px solid rgba(235, 77, 75, 0.3);
         }
 
+        /* Estilos para la paginación */
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(47, 62, 70, 0.2);
+        }
+
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            gap: 0.5rem;
+        }
+
+        .pagination .page-item {
+            display: flex;
+        }
+
+        .pagination .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.7rem 1rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: var(--color-text-dark);
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            min-width: 45px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--color-accent-green);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--color-accent-green);
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: rgba(255, 255, 255, 0.4);
+            color: rgba(47, 62, 70, 0.5);
+            cursor: not-allowed;
+        }
+
+        .pagination .page-item.disabled .page-link:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
         @media (max-width: 992px) {
             main {
                 margin-left: var(--sidebar-collapsed);
@@ -371,6 +444,32 @@
             .add-credit-form button {
                 width: 100%;
             }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .recent-recharges {
+                font-size: 0.9rem;
+            }
+
+            .recent-recharges th,
+            .recent-recharges td {
+                padding: 0.8rem 1rem;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .pagination .page-link {
+                padding: 0.5rem 0.8rem;
+                min-width: 40px;
+                font-size: 0.9rem;
+            }
         }
 
         @media (max-width: 576px) {
@@ -380,6 +479,12 @@
 
             .page-header h1 {
                 font-size: 1.5rem;
+            }
+
+            .recent-recharges th,
+            .recent-recharges td {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -454,11 +559,18 @@
 
         <div class="recent-section">
             <div class="section-header">
-                <i class="fas fa-history"></i>
-                <h2>Recent recharges</h2>
+                <div class="section-header-left">
+                    <i class="fas fa-history"></i>
+                    <h2>All recharges</h2>
+                </div>
+                @if(isset($allRecharges) && $allRecharges->count() > 0)
+                    <div class="total-recharges">
+                        Total: {{ $allRecharges->total() }} recharges
+                    </div>
+                @endif
             </div>
 
-            @if(isset($recentRecharges) && $recentRecharges->count() > 0)
+            @if(isset($allRecharges) && $allRecharges->count() > 0)
                 <table class="recent-recharges">
                     <thead>
                         <tr>
@@ -468,7 +580,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($recentRecharges as $recharge)
+                        @foreach($allRecharges as $recharge)
                             <tr>
                                 <td>{{ $recharge->user->name }}</td>
                                 <td>
@@ -481,10 +593,62 @@
                         @endforeach
                     </tbody>
                 </table>
+
+                <!-- Paginación -->
+                @if($allRecharges->hasPages())
+                    <div class="pagination-wrapper">
+                        <nav aria-label="Pagination Navigation">
+                            <ul class="pagination">
+                                {{-- Previous Page Link --}}
+                                @if ($allRecharges->onFirstPage())
+                                    <li class="page-item disabled">
+                                        <span class="page-link">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </span>
+                                    </li>
+                                @else
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $allRecharges->previousPageUrl() }}" rel="prev">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                @endif
+
+                                {{-- Pagination Elements --}}
+                                @foreach ($allRecharges->getUrlRange(1, $allRecharges->lastPage()) as $page => $url)
+                                    @if ($page == $allRecharges->currentPage())
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ $page }}</span>
+                                        </li>
+                                    @else
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                                        </li>
+                                    @endif
+                                @endforeach
+
+                                {{-- Next Page Link --}}
+                                @if ($allRecharges->hasMorePages())
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $allRecharges->nextPageUrl() }}" rel="next">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                @else
+                                    <li class="page-item disabled">
+                                        <span class="page-link">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </span>
+                                    </li>
+                                @endif
+                            </ul>
+                        </nav>
+                    </div>
+                @endif
             @else
                 <div class="no-results">
                     <i class="fas fa-info-circle"></i>
-                    <p>There are no recent reloads to show</p>
+                    <p>There are no recharges to show</p>
                 </div>
             @endif
         </div>

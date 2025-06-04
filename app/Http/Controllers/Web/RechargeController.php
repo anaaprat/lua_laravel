@@ -36,7 +36,7 @@ class RechargeController extends Controller
         $totalAmount = $movements->sum('amount');
 
         $deposits = $movements->where('amount', '>', 0)->sum('amount');
-        $withdrawals = $movements->where('amount', '<', 0)->sum('amount') * -1; 
+        $withdrawals = $movements->where('amount', '<', 0)->sum('amount') * -1;
 
         return view('bar.recharges', compact('movements', 'totalAmount', 'deposits', 'withdrawals'));
     }
@@ -63,14 +63,14 @@ class RechargeController extends Controller
                 ->first();
         }
 
-        $recentRecharges = Movement::where('bar_id', $bar->id)
+        // Cambiar de take(10) a paginate(15) para mostrar todas las transacciones con paginación
+        $allRecharges = Movement::where('bar_id', $bar->id)
             ->where('amount', '>', 0)
             ->with('user')
             ->orderBy('created_at', 'desc')
-            ->take(10) 
-            ->get();
+            ->paginate(15); // 15 elementos por página
 
-        return view('bar.rechargesUser', compact('user', 'recentRecharges'));
+        return view('bar.rechargesUser', compact('user', 'allRecharges'));
     }
 
     /**
