@@ -9,6 +9,7 @@ use App\Models\Movement;
 use App\Models\Order;
 use App\Models\BarProduct;
 use DB;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -199,7 +200,8 @@ class AdminController extends Controller
             'table_number' => 'nullable|integer|min:1',
         ]);
 
-        $token = Str::uuid();
+        // Generar token como string (igual que en RegisterController)
+        $token = Str::uuid()->toString();
 
         $bar = User::create([
             'name' => $validated['name'],
@@ -212,12 +214,29 @@ class AdminController extends Controller
             'deleted' => false,
         ]);
 
-        // Generar QR
-        $qr = QrCode::format('svg')->size(300)->generate($token);
-        $filePath = 'qrs/bar_' . Str::slug($bar->name) . '.svg';
-        Storage::disk('public')->put($filePath, $qr);
+        try {
+            $qrDir = storage_path('app/public/qrs');
+            if (!is_dir($qrDir)) {
+                mkdir($qrDir, 0755, true);
+                error_log("Created qrs directory: " . $qrDir);
+            }
 
-        $bar->update(['qr_path' => $filePath]);
+            $qr = QrCode::format('svg')->size(300)->generate($token);
+            $filePath = 'qrs/bar_' . $bar->name . '.svg';
+
+            $result = Storage::disk('public')->put($filePath, $qr);
+
+            if ($result) {
+                $bar->qr_path = $filePath;
+                $bar->save();
+                error_log("QR saved successfully: " . $filePath);
+            } else {
+                error_log("Failed to save QR: " . $filePath);
+            }
+
+        } catch (Exception $e) {
+            error_log("QR generation error: " . $e->getMessage());
+        }
 
         return redirect()->route('admin.bars')->with('success', 'Bar creado correctamente');
     }
@@ -311,7 +330,7 @@ class AdminController extends Controller
             $bar->update([
                 'deleted' => true,
                 'is_active' => false,
-                'token' => null, 
+                'token' => null,
                 'qr_path' => null
             ]);
 
@@ -391,7 +410,7 @@ class AdminController extends Controller
             'type' => 'required|string|max:255',
             'is_drink' => 'required|boolean',
             'image_url' => 'nullable|url|max:500',
-            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', 
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $imageUrl = null;
@@ -672,7 +691,7 @@ class AdminController extends Controller
 
         $users = $validated['users'] ?? [];
         if (!in_array($validated['creator_id'], $users)) {
-            $users[] = $validated['creator_id']; 
+            $users[] = $validated['creator_id'];
         }
 
         foreach ($users as $userId) {
