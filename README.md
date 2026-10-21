@@ -1,66 +1,103 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# LUA — Sistema de gestión para bares
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Descripción
 
-## About Laravel
+LUA es un sistema de gestión de pedidos para establecimientos de hostelería, desarrollado como proyecto final del Ciclo Formativo de Grado Superior en Desarrollo de Aplicaciones Multiplataforma (DAM).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+El proyecto nace de la necesidad de mejorar la experiencia de los clientes y optimizar el trabajo de los bares, especialmente en momentos de gran afluencia. La idea surgió a partir de los establecimientos situados en la calle Lua de San Fernando (Cádiz).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+LUA está compuesto por una plataforma web, una API REST y una aplicación móvil desarrollada con Flutter.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Este repositorio contiene el backend y la plataforma web desarrollados con Laravel.** La aplicación móvil forma parte del proyecto global, pero su código no está incluido aquí.
 
-## Learning Laravel
+## Funcionalidades principales
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Panel web para establecimientos
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- Gestión de productos, precios, disponibilidad y stock.
+- Recepción y seguimiento de pedidos.
+- Gestión de mesas.
+- Recarga de crédito para clientes.
+- Consulta del historial de pedidos y movimientos.
+- Estadísticas de ventas y productos más demandados.
+- Generación de códigos QR identificativos.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Panel de administración
 
-## Laravel Sponsors
+- Gestión de usuarios y establecimientos.
+- Administración del catálogo general de productos.
+- Gestión de pedidos y movimientos de crédito.
+- Supervisión de rankings.
+- Activación y desactivación de cuentas.
+- Consulta de información general del sistema.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Backend y API REST
 
-### Premium Partners
+La API permite la comunicación entre la aplicación móvil y la base de datos, incluyendo:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+- Autenticación y gestión de usuarios.
+- Validación de códigos QR.
+- Consulta de establecimientos y productos.
+- Gestión de pedidos.
+- Consulta y actualización del crédito.
+- Historial de movimientos.
+- Gestión de rankings entre usuarios.
 
-## Contributing
+## Tecnologías utilizadas
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Tecnología | Uso |
+|---|---|
+| PHP | Desarrollo del backend |
+| Laravel 10 | Framework principal |
+| MySQL | Base de datos relacional |
+| Blade | Plantillas de la plataforma web |
+| Tailwind CSS | Diseño de interfaces |
+| JavaScript | Funcionalidades interactivas |
+| API REST | Comunicación con la aplicación móvil |
+| Git y GitHub | Control de versiones |
+| Postman | Pruebas de la API |
 
-## Code of Conduct
+## Estructura del sistema
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+El sistema diferencia tres tipos de usuarios:
 
-## Security Vulnerabilities
+**Clientes:** utilizan la aplicación móvil para consultar las cartas digitales, realizar pedidos, gestionar su crédito y participar en rankings.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Establecimientos:** utilizan el panel web para administrar sus productos, gestionar pedidos, consultar estadísticas y realizar recargas de crédito.
 
-## License
+**Administradores:** supervisan los usuarios, establecimientos, productos, pedidos y movimientos del sistema.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Base de datos
+
+El proyecto utiliza MySQL como sistema de gestión de bases de datos relacionales.
+
+La estructura incluye entidades para usuarios, productos, productos asociados a establecimientos, pedidos, detalles de pedidos, movimientos de crédito y rankings.
+
+Las relaciones y la estructura de las tablas se gestionan mediante modelos y migraciones de Laravel.
+
+## Seguridad
+
+El sistema incorpora autenticación, gestión de roles y protección de rutas según el tipo de usuario.
+
+Las credenciales y configuraciones específicas de cada entorno se almacenan en archivos privados que no se incluyen en el repositorio.
+
+## Posibles mejoras futuras
+
+- Incorporación de notificaciones sobre el estado de los pedidos.
+- Integración de nuevos métodos de pago.
+- Sistema de reservas de mesas.
+- Ampliación de estadísticas e informes.
+- Implementación de programas de fidelización.
+- Adaptación del sistema a otros sectores y establecimientos.
+
+## Documentación
+
+El desarrollo completo del proyecto, las decisiones técnicas, las pruebas realizadas y los manuales de usuario se encuentran recogidos en la memoria del proyecto final.
+
+## Autora
+
+**Ana Prat Garrido**
+
+Proyecto Integrado — Desarrollo de Aplicaciones Multiplataforma (DAM)
+
+Colegio Salesianos «San Ignacio», Cádiz — 2025.
